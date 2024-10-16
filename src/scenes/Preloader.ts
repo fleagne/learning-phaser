@@ -36,19 +36,13 @@ export class Preloader extends Scene {
     });
 
     // 敵の画像
-    this.load.spritesheet("enemy", "images/slime.png", {
+    this.load.spritesheet("slime", "images/slime.png", {
       frameWidth: 112,
       frameHeight: 68,
     });
 
-    // 鍵の画像
-    this.load.spritesheet("key", "images/key.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
-
     // マップのJSONファイルの読み込み
-    this.load.tilemapTiledJSON("map01", "data/map01.json");
+    this.load.tilemapTiledJSON("map01", "maps/map01.json");
   }
 
   create() {
