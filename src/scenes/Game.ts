@@ -2,8 +2,8 @@ import { Scene } from "phaser";
 
 export class Game extends Scene {
   map: Phaser.Tilemaps.Tilemap;
-  mapOriginX: number;
-  mapOriginY: number;
+  // mapOriginX: number;
+  // mapOriginY: number;
   groundLayer: Phaser.Tilemaps.TilemapLayer | null;
   excludeCollideIndexes: number[];
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -35,28 +35,7 @@ export class Game extends Scene {
   }
 
   preload() {
-    this.load.setPath("assets");
-
-    // タイル画像
-    this.load.spritesheet("tile", "images/sokoban_tilesheet.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
-
-    // 敵の画像
-    this.load.spritesheet("enemy", "images/slime.png", {
-      frameWidth: 112,
-      frameHeight: 68,
-    });
-
-    // 鍵の画像
-    this.load.spritesheet("key", "images/key.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
-
-    // マップのJSONファイルの読み込み
-    this.load.tilemapTiledJSON("map01", "data/map01.json");
+    // Nothing
   }
 
   create() {
@@ -140,6 +119,12 @@ export class Game extends Scene {
         this.player.x -= this.dx;
         this.player.anims.play("left", true);
       }
+      if (tile?.index === 12) {
+        this.cameras.main.pan(0, 0, 500, "Power2");
+        this.key.setPosition((this.game.config.width as number) - 112, 16)
+        this.player.x -= this.dx;
+        this.player.anims.play("left", true);
+      }
       if (tile?.index === 13) {
         this.key.setText(`残りの鍵: ${--this.leftKey}`);
         this.map.replaceByIndex(tile.index, 0, tile.x, tile.y, 1, 1);
@@ -159,9 +144,14 @@ export class Game extends Scene {
         this.player.x += this.dx;
         this.player.anims.play("right", true);
       }
+      if (tile?.index === 12) {
+        this.cameras.main.pan(this.map.widthInPixels, 0, 500, "Power2");
+        this.key.setPosition(this.map.widthInPixels - 112, 16)
+        this.player.x += this.dx;
+        this.player.anims.play("right", true);
+      }
       if (tile?.index === 13) {
         this.key.setText(`残りの鍵: ${--this.leftKey}`);
-        console.log(tile);
         this.map.replaceByIndex(tile.index, 0, tile.x, tile.y, 1, 1);
       }
       if (tile?.index === 14) {
@@ -236,39 +226,56 @@ export class Game extends Scene {
     }
 
     // 地面レイヤー作成 DynamicTilemapLayerオブジェクト作成
-    const layerWidth = 64 * 1 * 12;
+    const layerWidth = 64 * 1 * 24;
     const layerHeight = 64 * 1 * 12;
 
     // ゲーム画面の幅・高さを取得
-    const gameWidth = this.game.config.width as number;
-    const gameHeight = this.game.config.height as number;
+    // const gameWidth = this.game.config.width as number;
+    // const gameHeight = this.game.config.height as number;
 
     // 画面中央のX座標
-    this.mapOriginX = (gameWidth - layerWidth) / 2;
+    // this.mapOriginX = (gameWidth - layerWidth) / 2;
     // 画面中央のY座標
-    this.mapOriginY = (gameHeight - layerHeight) / 2;
+    // this.mapOriginY = (gameHeight - layerHeight) / 2;
 
     this.groundLayer = this.map.createLayer(
       "stage",
       groundTiles,
-      this.mapOriginX,
-      this.mapOriginY
+      // this.mapOriginX,
+      // this.mapOriginY
+      0,
+      0
+    );
+    this.physics.world.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels
+    );
+    this.cameras.main.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels
     );
     this.groundLayer?.setDisplaySize(layerWidth, layerHeight);
 
     // 衝突判定から除外したいタイルのインデックスを配列で指定する
     // "-1" は空のタイルなので衝突しない。それ以外は衝突する
+    // "12" は部屋移動のタイルなので衝突しない。
     // "13" は鍵のタイルなので衝突しない
     // "14" はゴールのタイルなので衝突しない
-    this.excludeCollideIndexes = [-1, 0, 13, 14];
+    this.excludeCollideIndexes = [-1, 0, 12, 13, 14];
     this.groundLayer?.setCollisionByExclusion(this.excludeCollideIndexes);
   }
 
   createPlayer() {
     // プレイヤー作成
     this.player = this.physics.add.sprite(
-      this.mapOriginX + 32,
-      this.mapOriginY + 64 + 32,
+      // this.mapOriginX + 32,
+      // this.mapOriginY + 64 + 32,
+      32,
+      64 + 32,
       "tile"
     );
 
@@ -326,8 +333,10 @@ export class Game extends Scene {
   createEnemy1(x: number, y: number) {
     // 敵キャラ作成
     this.enemy1 = this.physics.add.sprite(
-      this.mapOriginX + 64 * x + 32,
-      this.mapOriginY + 64 * y + 32,
+      // this.mapOriginX + 64 * x + 32,
+      // this.mapOriginY + 64 * y + 32,
+      64 * x + 32,
+      64 * y + 32,
       "enemy"
     );
 
@@ -360,8 +369,10 @@ export class Game extends Scene {
   createEnemy2(x: number, y: number) {
     // 敵キャラ作成
     this.enemy2 = this.physics.add.sprite(
-      this.mapOriginX + 64 * x + 32,
-      this.mapOriginY + 64 * y + 32,
+      // this.mapOriginX + 64 * x + 32,
+      // this.mapOriginY + 64 * y + 32,
+      64 * x + 32,
+      64 * y + 32,
       "enemy"
     );
 

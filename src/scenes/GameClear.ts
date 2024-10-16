@@ -13,10 +13,10 @@ export class GameClear extends Scene {
     this.camera = this.cameras.main;
     this.camera.setBackgroundColor(0x00ff00);
 
-    this.background = this.add.image(512, 384, "background");
+    this.background = this.add.image(384, 384, "background");
     this.background.setAlpha(0.5);
 
-    this.gameclear_text = this.add.text(512, 384, "Game Clear", {
+    this.gameclear_text = this.add.text(384, 384, "Game Clear", {
       fontFamily: "Arial Black",
       fontSize: 64,
       color: "#ffffff",
