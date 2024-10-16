@@ -1,4 +1,5 @@
 import { Scene } from "phaser";
+import Player from "../components/player/player";
 
 export class Game extends Scene {
   map: Phaser.Tilemaps.Tilemap;
@@ -6,7 +7,7 @@ export class Game extends Scene {
   // mapOriginY: number;
   groundLayer: Phaser.Tilemaps.TilemapLayer | null;
   excludeCollideIndexes: number[];
-  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  player: Player;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   dx: number;
   dy: number;
@@ -22,7 +23,7 @@ export class Game extends Scene {
   }
 
   init() {
-    // プレイヤーの移動量を定義
+    // プレイヤーおよび敵の移動量を定義
     this.dx = 64;
     this.dy = 64;
 
@@ -40,7 +41,14 @@ export class Game extends Scene {
 
   create() {
     this.createMap();
-    this.createPlayer();
+
+    this.cursors = this.input.keyboard?.createCursorKeys();
+
+    this.player = new Player(this, 0, 1);
+
+    // プレイヤーが地面レイヤーと衝突する設定
+    this.physics.add.collider(this.player, this.groundLayer!);
+
     this.createEnemy1(7, 1);
     this.createEnemy2(4, 7);
 
@@ -217,6 +225,20 @@ export class Game extends Scene {
     // JSON形式のマップデータの読み込み Tilemapオブジェクトの作成
     this.map = this.make.tilemap({ key: "map01" });
 
+    // 表示範囲外のオブジェクトも描写されるようにする処理
+    this.physics.world.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels
+    );
+    this.cameras.main.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels
+    );
+
     // タイル画像をマップデータに反映する Tilesetオブジェクトの作成
     const groundTiles = this.map.addTilesetImage("tile", "tile");
     if (!groundTiles) {
@@ -246,18 +268,6 @@ export class Game extends Scene {
       0,
       0
     );
-    this.physics.world.setBounds(
-      0,
-      0,
-      this.map.widthInPixels,
-      this.map.heightInPixels
-    );
-    this.cameras.main.setBounds(
-      0,
-      0,
-      this.map.widthInPixels,
-      this.map.heightInPixels
-    );
     this.groundLayer?.setDisplaySize(layerWidth, layerHeight);
 
     // 衝突判定から除外したいタイルのインデックスを配列で指定する
@@ -267,67 +277,6 @@ export class Game extends Scene {
     // "14" はゴールのタイルなので衝突しない
     this.excludeCollideIndexes = [-1, 0, 12, 13, 14];
     this.groundLayer?.setCollisionByExclusion(this.excludeCollideIndexes);
-  }
-
-  createPlayer() {
-    // プレイヤー作成
-    this.player = this.physics.add.sprite(
-      // this.mapOriginX + 32,
-      // this.mapOriginY + 64 + 32,
-      32,
-      64 + 32,
-      "tile"
-    );
-
-    // 衝突サイズの調整
-    // プレイヤーのサイズ変更
-    this.player.setDisplaySize(64, 64);
-
-    // プレイヤーの最初の向きは右
-    this.player.setFrame(52);
-
-    // プレイヤーの衝突時のバウンス設定
-    this.player.setBounce(0);
-
-    // プレイヤーがゲームワールドの外に出ないように衝突させる
-    this.player.setCollideWorldBounds(true);
-
-    // プレイヤーが地面レイヤーと衝突する設定
-    this.physics.add.collider(this.player, this.groundLayer!);
-
-    // 下向きのアニメーション
-    this.anims.create({
-      key: "down",
-      frames: this.anims.generateFrameNumbers("tile", { start: 52, end: 54 }),
-      frameRate: 2,
-      repeat: -1,
-    });
-
-    // 上向きのアニメーション
-    this.anims.create({
-      key: "up",
-      frames: this.anims.generateFrameNumbers("tile", { start: 55, end: 57 }),
-      frameRate: 2,
-      repeat: -1,
-    });
-
-    // 左向きのアニメーション
-    this.anims.create({
-      key: "left",
-      frames: this.anims.generateFrameNumbers("tile", { start: 81, end: 83 }),
-      frameRate: 2,
-      repeat: -1,
-    });
-
-    // 右向きのアニメーション
-    this.anims.create({
-      key: "right",
-      frames: this.anims.generateFrameNumbers("tile", { start: 78, end: 80 }),
-      frameRate: 2,
-      repeat: -1,
-    });
-
-    this.cursors = this.input.keyboard?.createCursorKeys();
   }
 
   createEnemy1(x: number, y: number) {
