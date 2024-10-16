@@ -1,0 +1,29 @@
+{
+  "name": "learning-phaser",
+  "description": "Learning Phaser 3",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fleagne/learning-phaser"
+  },
+  "author": "Toshinori Suzuki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fleagne/learning-phaser/issues"
+  },
+  "homepage": "https://github.com/fleagne/learning-phaser",
+  "scripts": {
+    "dev": "node log.js dev & vite --config vite/config.dev.mjs",
+    "build": "node log.js build & vite build --config vite/config.prod.mjs",
+    "dev-nolog": "vite --config vite/config.dev.mjs",
+    "build-nolog": "vite build --config vite/config.prod.mjs"
+  },
+  "devDependencies": {
+    "terser": "^5.34.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.9"
+  },
+  "dependencies": {
+    "phaser": "^3.86.0"
+  }
+}
