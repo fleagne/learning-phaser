@@ -12,6 +12,10 @@ export class Game extends Scene {
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   key: Phaser.GameObjects.Text;
   leftKey: number;
+  accelerationText: Phaser.GameObjects.Text;
+  accelerationX: number;
+  accelerationY: number;
+  accelerationZ: number;
 
   constructor() {
     super("Game");
@@ -38,9 +42,7 @@ export class Game extends Scene {
       Constants.TILE_SIZE * 1 * 12
     );
 
-    this.groundLayer.setCollisionByExclusion(
-      Constants.EXCLUDE_COLLIDE_INDEXES
-    );
+    this.groundLayer.setCollisionByExclusion(Constants.EXCLUDE_COLLIDE_INDEXES);
 
     // キーボードによる入力を受け付けられるようにする
     this.cursors = this.input.keyboard?.createCursorKeys();
@@ -70,6 +72,28 @@ export class Game extends Scene {
       `残りの鍵: ${this.leftKey}`,
       { font: "16px Courier" }
     );
+
+    // iPhoneから加速度情報を表示する
+    const socket = new WebSocket("wss://192.168.0.3:8081");
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+      // 必要なデータを送信する処理など
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    this.accelerationText = this.add.text(
+      (this.game.config.width as number) - 224,
+      64,
+      "Acceleration:",
+      { font: "16px Courier" }
+    );
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      this.updateAccelerationText(data);
+    };
   }
 
   update() {
@@ -77,7 +101,11 @@ export class Game extends Scene {
     if (!this.cursors) return;
 
     // 左移動時の処理
-    if (this.input.keyboard?.checkDown(this.cursors.left, 300)) {
+    if (
+      this.input.keyboard?.checkDown(this.cursors.left, 300) ||
+      this.accelerationX <= -5
+    ) {
+      this.accelerationX = 0;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x - Constants.TILE_SIZE,
         this.player.y,
@@ -104,7 +132,11 @@ export class Game extends Scene {
       }
 
       // 右移動時の処理
-    } else if (this.input.keyboard?.checkDown(this.cursors.right, 300)) {
+    } else if (
+      this.input.keyboard?.checkDown(this.cursors.right, 300) ||
+      this.accelerationX >= 5
+    ) {
+      this.accelerationX = 0;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x + Constants.TILE_SIZE,
         this.player.y,
@@ -131,7 +163,11 @@ export class Game extends Scene {
       }
 
       // 上移動時の処理
-    } else if (this.input.keyboard?.checkDown(this.cursors.up, 300)) {
+    } else if (
+      this.input.keyboard?.checkDown(this.cursors.up, 300) ||
+      this.accelerationZ <= -5
+    ) {
+      this.accelerationZ = 0;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x,
         this.player.y - Constants.TILE_SIZE,
@@ -152,7 +188,11 @@ export class Game extends Scene {
       }
 
       // 下移動時の処理
-    } else if (this.input.keyboard?.checkDown(this.cursors.down, 300)) {
+    } else if (
+      this.input.keyboard?.checkDown(this.cursors.down, 300) ||
+      this.accelerationZ >= 5
+    ) {
+      this.accelerationZ = 0;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x,
         this.player.y + Constants.TILE_SIZE,
@@ -179,5 +219,17 @@ export class Game extends Scene {
     if (this.leftKey === 0) {
       this.map.getTilemap().replaceByIndex(78, 0);
     }
+  }
+
+  updateAccelerationText(acceleration: { x: number; y: number; z: number }) {
+    // 受信した加速度情報を表示
+    this.accelerationText.setText(
+      `Acceleration:\nX: ${acceleration.x.toFixed(
+        2
+      )}\nY: ${acceleration.y.toFixed(2)}\nZ: ${acceleration.z.toFixed(2)}`
+    );
+    this.accelerationX = Math.floor(acceleration.x);
+    this.accelerationY = Math.floor(acceleration.y);
+    this.accelerationZ = Math.floor(acceleration.z);
   }
 }

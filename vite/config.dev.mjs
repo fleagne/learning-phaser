@@ -1,3 +1,4 @@
+import basicSsl from "@vitejs/plugin-basic-ssl";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -12,6 +13,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: 8080,
+    port: 8080, // 使いたいポート番号
+    host: "0.0.0.0", // 外部アクセスを可能にするため
   },
+  plugins: [basicSsl()],
 });

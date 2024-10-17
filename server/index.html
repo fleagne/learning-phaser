@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accelerometer WebSocket</title>
+  </head>
+  <body>
+    <h1>Accelerometer Data</h1>
+    <div id="id"></div>
+    <button onclick="deviceMotionRequest()">ここをクリックしてね</button>
+    <div>WebSocketの状況</div>
+    <div id="socket"></div>
+    <br />
+    <div id="x"></div>
+    <div id="y"></div>
+    <div id="z"></div>
+    <button onclick="testConnection()">Test Connection</button>
+    <div id="test"></div>
+    <script>
+      const test = document.getElementById("test");
+      function testConnection() {
+        fetch("https://192.168.0.3:8081", {
+          method: "GET",
+          mode: "no-cors",
+        })
+          .then((response) => {
+            test.innerText = `Server reached: ${JSON.stringify(response)}`;
+          })
+          .catch((error) => {
+            test.innerText = `Server error: ${JSON.stringify(error)}`;
+          });
+      }
+    </script>
+    <script>
+      const div = document.createElement("div");
+
+      const id = document.getElementById("id");
+      id.innerHTML = "DeviceMotionEvent is supported!!!";
+
+      const socket = new WebSocket("wss://192.168.0.3:8081");
+      const socketDiv = document.getElementById("socket");
+
+      socket.onopen = function (e) {
+        socketDiv.append(`[open] Connection established`, div);
+      };
+
+      socket.onclose = function (event) {
+        socketDiv.append(
+          `[close] Code: ${event.code}, Reason: ${
+            event.reason || "No reason provided"
+          }`,
+          div
+        );
+
+        // 一般的なWebSocketクローズコードの解釈
+        switch (event.code) {
+          case 1000:
+            socketDiv.append("Normal closure", div);
+            break;
+          case 1001:
+            socketDiv.append("Going Away", div);
+            break;
+          case 1002:
+            socketDiv.append("Protocol Error", div);
+            break;
+          case 1003:
+            socketDiv.append("Unsupported Data", div);
+            break;
+          case 1005:
+            socketDiv.append("No Status Received", div);
+            break;
+          case 1006:
+            socketDiv.append("Abnormal Closure", div);
+            break;
+          default:
+            socketDiv.append(`Unknown close code: ${event.code}`, div);
+        }
+      };
+
+      socket.onerror = function (error) {
+        socketDiv.append(`[error] Connection failed`, div);
+
+        // エラーの詳細情報を可能な限り表示
+        if (error.target) {
+          socketDiv.append(`ReadyState: ${error.target.readyState}`, div);
+          socketDiv.append(`URL: ${error.target.url}`, div);
+        }
+      };
+
+      const x = document.getElementById("x");
+      const y = document.getElementById("y");
+      const z = document.getElementById("z");
+
+      let acceleration;
+      const deviceMotionRequest = () => {
+        if (DeviceMotionEvent.requestPermission) {
+          DeviceMotionEvent.requestPermission()
+            .then((permissionState) => {
+              if (permissionState === "granted") {
+                window.addEventListener("devicemotion", (event) => {
+                  if (!event.accelerationIncludingGravity) {
+                    alert("event.accelerationIncludingGravity is null");
+                    return;
+                  }
+                  acceleration = {
+                    x: event.accelerationIncludingGravity.x,
+                    y: event.accelerationIncludingGravity.y,
+                    z: event.accelerationIncludingGravity.z,
+                  };
+                  x.innerText = `X: ${acceleration.x}`;
+                  y.innerText = `Y: ${acceleration.y}`;
+                  z.innerText = `Z: ${acceleration.z}`;
+                });
+              }
+            })
+            .catch((error) => {
+              id.innerText = error;
+            });
+        } else {
+          id.innerText = "DeviceMotionEvent.requestPermission is not found";
+        }
+      };
+
+      setInterval(() => {
+        socket.send(JSON.stringify(acceleration));
+      }, 500);
+    </script>
+  </body>
+</html>
