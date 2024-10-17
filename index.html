@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      .button {
+        background-color: #3eb2fd;
+        background-image: linear-gradient(1deg, #4f58fd, #149bf3 99%);
+        background-size: calc(100% + 20px) calc(100% + 20px);
+        border-radius: 100px;
+        color: #ffffff;
+        font-size: 1rem;
+        line-height: 1.5;
+        padding: 6px 20px;
+      }
+    </style>
     <title>Phaser - Template</title>
   </head>
   <body>
@@ -11,50 +23,7 @@
       <div id="game-container"></div>
     </div>
     <br />
-    <div style="text-align: center">
-      <button type="button" onclick="deviceMotionRequest()">
-        スマホでプレイする
-      </button>
-    </div>
+    <div id="smartphone-button" style="text-align: center"></div>
     <script type="module" src="/src/main.ts"></script>
-    <script>
-      // const ws = new WebSocket("wss://192.168.0.3:8081");
-      const ws = new WebSocket("wss://cloud.achex.ca/learning-phaser");
-      ws.onopen = (e) => {
-        console.log("WebSocket connection established in Smartphone");
-        ws.send(JSON.stringify({ auth: "hoge", password: "1234" }));
-      };
-
-      let acceleration;
-      const deviceMotionRequest = () => {
-        if (DeviceMotionEvent.requestPermission) {
-          DeviceMotionEvent.requestPermission()
-            .then((permissionState) => {
-              if (permissionState === "granted") {
-                window.addEventListener("devicemotion", (event) => {
-                  if (!event.accelerationIncludingGravity) {
-                    alert("event.accelerationIncludingGravity is null");
-                    return;
-                  }
-                  acceleration = {
-                    x: event.accelerationIncludingGravity.x,
-                    y: event.accelerationIncludingGravity.y,
-                    z: event.accelerationIncludingGravity.z,
-                  };
-                });
-              }
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        }
-      };
-
-      setInterval(() => {
-        ws.send(
-          JSON.stringify({ id: "id", to: "hoge", message: { acceleration } })
-        );
-      }, 500);
-    </script>
   </body>
 </html>

@@ -12,7 +12,6 @@ export class Game extends Scene {
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   key: Phaser.GameObjects.Text;
   leftKey: number;
-  accelerationText: Phaser.GameObjects.Text;
   accelerationX: number;
   accelerationY: number;
   accelerationZ: number;
@@ -73,29 +72,37 @@ export class Game extends Scene {
       { font: "16px Courier" }
     );
 
-    // iPhoneから加速度情報を表示する
-    // const ws = new WebSocket("wss://192.168.0.3:8081");
-    const ws = new WebSocket("wss://cloud.achex.ca/learning-phaser");
-    ws.onopen = () => {
-      console.log("WebSocket connection established in Game");
-      ws.send(JSON.stringify({ auth: "hoge", password: "1234" }));
-    };
+    // スマートフォンでアクセスしている場合は、WebSocketサーバにアクセスし、加速度情報を取得する
+    if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
+      const ws = new WebSocket(`wss://cloud.achex.ca/${Constants.ID}`);
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ auth: "game", password: "1234" }));
+      };
 
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        this.updateAcceleration(data.message.acceleration);
+      };
 
-    this.accelerationText = this.add.text(
-      (this.game.config.width as number) - 224,
-      64,
-      "Acceleration:",
-      { font: "16px Courier" }
-    );
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log(data.message.acceleration)
-      this.updateAccelerationText(data.message.acceleration);
-    };
+      const button = document.getElementById("button");
+      if (button) {
+        const addElemAcceleration = document.createElement("div");
+        addElemAcceleration.setAttribute("id", "acceleration");
+        addElemAcceleration.innerText = `Acceleration:\nX: ${this.accelerationX}\nY: ${this.accelerationY}\nZ: ${this.accelerationZ}`;
+        button.parentNode?.insertBefore(
+          addElemAcceleration,
+          button.nextElementSibling
+        );
+
+        const addElemExplanation = document.createElement("div");
+        addElemExplanation.innerText =
+          "端末の角度によって、キャラクターを動かせます\nXが-4以下:左  Xが4以上:右\nZが-9以下:上  Zが-1以上:下\n";
+        button.parentNode?.insertBefore(
+          addElemExplanation,
+          button.nextElementSibling
+        );
+      }
+    }
   }
 
   update() {
@@ -223,15 +230,15 @@ export class Game extends Scene {
     }
   }
 
-  updateAccelerationText(acceleration: { x: number; y: number; z: number }) {
+  updateAcceleration(acceleration: { x: number; y: number; z: number }) {
     // 受信した加速度情報を表示
-    this.accelerationText.setText(
-      `Acceleration:\nX: ${acceleration.x.toFixed(
-        2
-      )}\nY: ${acceleration.y.toFixed(2)}\nZ: ${acceleration.z.toFixed(2)}`
-    );
     this.accelerationX = Math.floor(acceleration.x);
     this.accelerationY = Math.floor(acceleration.y);
     this.accelerationZ = Math.floor(acceleration.z);
+
+    const accelerationElem = document.getElementById("acceleration");
+    if (accelerationElem) {
+      accelerationElem.innerText = `Acceleration:\nX: ${this.accelerationX}\nY: ${this.accelerationY}\nZ: ${this.accelerationZ}`;
+    }
   }
 }
