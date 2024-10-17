@@ -82,22 +82,6 @@ openssl req -x509 -new -days 365 -nodes \
 ```
 
 ### 接続
-#### iPhone側
-```bash
-sudo python run_server.py
-```
-
-通常ユーザーで起動すると、`PermissionError: [Errno 13] Permission denied`となる
-
-スマートフォンからPCのローカルサーバーにアクセス、コントローラーとして使用できるようにする
-
-接続先：
-
-```bash
-https://192.168.0.3:8000/
-```
-
-
 #### Pythonサーバー側
 ```bash
 python server.py

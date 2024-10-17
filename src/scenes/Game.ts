@@ -74,13 +74,14 @@ export class Game extends Scene {
     );
 
     // iPhoneから加速度情報を表示する
-    const socket = new WebSocket("wss://192.168.0.3:8081");
-    socket.onopen = () => {
-      console.log("WebSocket connection established");
-      // 必要なデータを送信する処理など
+    // const ws = new WebSocket("wss://192.168.0.3:8081");
+    const ws = new WebSocket("wss://cloud.achex.ca/learning-phaser");
+    ws.onopen = () => {
+      console.log("WebSocket connection established in Game");
+      ws.send(JSON.stringify({ auth: "hoge", password: "1234" }));
     };
 
-    socket.onerror = (error) => {
+    ws.onerror = (error) => {
       console.error("WebSocket error:", error);
     };
 
@@ -90,9 +91,10 @@ export class Game extends Scene {
       "Acceleration:",
       { font: "16px Courier" }
     );
-    socket.onmessage = (event) => {
+    ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      this.updateAccelerationText(data);
+      console.log(data.message.acceleration)
+      this.updateAccelerationText(data.message.acceleration);
     };
   }
 
@@ -103,7 +105,7 @@ export class Game extends Scene {
     // 左移動時の処理
     if (
       this.input.keyboard?.checkDown(this.cursors.left, 300) ||
-      this.accelerationX <= -5
+      this.accelerationX <= -4
     ) {
       this.accelerationX = 0;
       const tile = this.groundLayer?.getTileAtWorldXY(
@@ -134,7 +136,7 @@ export class Game extends Scene {
       // 右移動時の処理
     } else if (
       this.input.keyboard?.checkDown(this.cursors.right, 300) ||
-      this.accelerationX >= 5
+      this.accelerationX >= 4
     ) {
       this.accelerationX = 0;
       const tile = this.groundLayer?.getTileAtWorldXY(
@@ -165,9 +167,9 @@ export class Game extends Scene {
       // 上移動時の処理
     } else if (
       this.input.keyboard?.checkDown(this.cursors.up, 300) ||
-      this.accelerationZ <= -5
+      this.accelerationZ <= -9
     ) {
-      this.accelerationZ = 0;
+      this.accelerationZ = -3;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x,
         this.player.y - Constants.TILE_SIZE,
@@ -190,9 +192,9 @@ export class Game extends Scene {
       // 下移動時の処理
     } else if (
       this.input.keyboard?.checkDown(this.cursors.down, 300) ||
-      this.accelerationZ >= 5
+      this.accelerationZ >= -1
     ) {
-      this.accelerationZ = 0;
+      this.accelerationZ = -3;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x,
         this.player.y + Constants.TILE_SIZE,

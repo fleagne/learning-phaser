@@ -17,7 +17,7 @@ const config: Types.Core.GameConfig = {
   parent: "game-container",                                          // ゲームキャンバスを描画するためのDOM要素のID
   backgroundColor: "#028af8",                                        // ゲームキャンバスの背景色。デフォルトは黒
   scale: {
-    mode: Phaser.Scale.NONE,                                         // スケールモード, FITにすると画面サイズに合わせて拡大される
+    mode: Phaser.Scale.FIT,                                          // スケールモード, FITにすると画面サイズに合わせて拡大される
     autoCenter: Phaser.Scale.CENTER_BOTH,                            // キャンバスを自動的に中央にする
   },
   physics: {
