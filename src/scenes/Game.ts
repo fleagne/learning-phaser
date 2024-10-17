@@ -3,6 +3,7 @@ import { Constants } from "../components/constants";
 import EnemiesGroup from "../components/enemies/enemiesGroup";
 import Map from "../components/map";
 import Player from "../components/player/player";
+import { uuid } from "../main";
 
 export class Game extends Scene {
   map: Map;
@@ -74,7 +75,7 @@ export class Game extends Scene {
 
     // スマートフォンでアクセスしている場合は、WebSocketサーバにアクセスし、加速度情報を取得する
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
-      const ws = new WebSocket(`wss://cloud.achex.ca/${Constants.ID}`);
+      const ws = new WebSocket(`wss://cloud.achex.ca/${uuid}`);
       ws.onopen = () => {
         ws.send(JSON.stringify({ auth: "game", password: "1234" }));
       };

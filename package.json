@@ -11,10 +11,11 @@
   "bugs": {
     "url": "https://github.com/fleagne/learning-phaser/issues"
   },
-  "homepage": "https://github.com/fleagne/learning-phaser",
+  "homepage": "https://learning-phaser.pages.dev/",
   "scripts": {
     "dev": "node log.js dev & vite --config vite/config.dev.mjs",
     "build": "node log.js build & vite build --config vite/config.prod.mjs",
+    "deploy": "pnpm build && wrangler pages deploy ./dist",
     "dev-nolog": "vite --config vite/config.dev.mjs",
     "build-nolog": "vite build --config vite/config.prod.mjs"
   },

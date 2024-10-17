@@ -8,6 +8,8 @@ import { Preloader } from "./scenes/Preloader";
 
 import { Game, Types } from "phaser";
 
+export const uuid = self.crypto.randomUUID();
+
 init();
 
 // ゲームコンフィグについての詳細はこちら：

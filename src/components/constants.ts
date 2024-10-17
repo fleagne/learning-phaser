@@ -6,5 +6,4 @@ export class Constants {
   // "14" はゴールのタイルなので衝突しない
   static readonly EXCLUDE_COLLIDE_INDEXES = [-1, 0, 12, 13, 14];
   static readonly TILE_SIZE = 64;
-  static readonly ID = self.crypto.randomUUID();
 }

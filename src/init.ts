@@ -1,4 +1,4 @@
-import { Constants } from "./components/constants";
+import { uuid } from "./main";
 
 export function init() {
   let ws: WebSocket;
@@ -10,10 +10,7 @@ export function init() {
       // @ts-ignore
       DeviceMotionEvent.requestPermission().then((permissionState: string) => {
         if (permissionState === "granted") {
-          const button = document.getElementById("button");
-          if (button) {
-            button.innerText = "スマホで操作中...";
-          }
+          document.getElementById("button")?.remove();
 
           window.addEventListener(
             "devicemotion",
@@ -35,7 +32,7 @@ export function init() {
 
   // スマートフォンの場合のみ、WebSocketにつなぎ、ボタンを表示する
   if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
-    ws = new WebSocket(`wss://cloud.achex.ca/${Constants.ID}`);
+    ws = new WebSocket(`wss://cloud.achex.ca/${uuid}`);
 
     // WebSocketの接続が確立したとき、認証を行う
     ws.onopen = () => {
@@ -59,5 +56,5 @@ export function init() {
         JSON.stringify({ id: "id", to: "game", message: { acceleration } })
       );
     }
-  }, 500);
+  }, 400);
 }
