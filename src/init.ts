@@ -1,4 +1,4 @@
-import { uuid } from "./main";
+import { uuidGame, uuidSmartphone, uuidWebSocket } from "./main";
 
 export function init() {
   let ws: WebSocket;
@@ -32,11 +32,11 @@ export function init() {
 
   // スマートフォンの場合のみ、WebSocketにつなぎ、ボタンを表示する
   if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
-    ws = new WebSocket(`wss://cloud.achex.ca/${uuid}`);
+    ws = new WebSocket(`wss://cloud.achex.ca/${uuidWebSocket}`);
 
     // WebSocketの接続が確立したとき、認証を行う
     ws.onopen = () => {
-      ws.send(JSON.stringify({ auth: "smartphone", password: "1234" }));
+      ws.send(JSON.stringify({ auth: uuidSmartphone, password: "1234" }));
     };
 
     const div = document.getElementById("smartphone-button");
@@ -53,7 +53,7 @@ export function init() {
   setInterval(() => {
     if (acceleration) {
       ws.send(
-        JSON.stringify({ id: "id", to: "game", message: { acceleration } })
+        JSON.stringify({ id: "id", to: uuidGame, message: { acceleration } })
       );
     }
   }, 400);

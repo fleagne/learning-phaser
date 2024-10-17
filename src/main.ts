@@ -8,7 +8,10 @@ import { Preloader } from "./scenes/Preloader";
 
 import { Game, Types } from "phaser";
 
-export const uuid = self.crypto.randomUUID();
+// 同時にアクセスされたときに干渉しないように調整
+export const uuidWebSocket = self.crypto.randomUUID();
+export const uuidSmartphone = self.crypto.randomUUID();
+export const uuidGame = self.crypto.randomUUID();
 
 init();
 
