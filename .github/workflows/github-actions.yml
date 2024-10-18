@@ -1,0 +1,52 @@
+name: Build and Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. リポジトリのクローンとセットアップ
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Node.jsの設定（pnpmの使用のため）
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      # 3. pnpmのインストール
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      # 4. 依存関係のインストール
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: pnpm install
+
+      # 5. フロントエンドのビルド
+      - name: Build frontend
+        working-directory: ./frontend
+        run: pnpm build
+
+      # 6. AWS CLI のセットアップ
+      - name: Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "ap-northeast-1"
+
+      # 7. S3にファイルをアップロード
+      - name: Upload to S3
+        run: aws s3 cp ./frontend/dist s3://learning-phaser --recursive
+
+      # 8. CloudFrontキャッシュのインバリデート
+      - name: Invalidate CloudFront cache
+        run: aws cloudfront create-invalidation --distribution-id ERD3D10KB2404 --paths "/*"

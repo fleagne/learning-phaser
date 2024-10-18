@@ -79,13 +79,7 @@ https://192.168.0.3:8080/
 
 ## ⚡️ Deploy
 ### Application
-```bash
-cd frontend
-pnpm run build
-
-cd ..
-pnpm run deploy:frontend
-```
+Push to main branch, GitHub Actions will deploy automatically.
 
 This is because, although we updated the static files in the S3 bucket, the CloudFront distribution we access our website from has cached the static files and served the cached pages.
 
