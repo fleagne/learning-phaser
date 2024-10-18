@@ -12,5 +12,10 @@
     "url": "https://github.com/fleagne/learning-phaser/issues"
   },
   "homepage": "https://d1mbl2iqjrkpy1.cloudfront.net",
+  "scripts": {
+    "s3:cp": "aws s3 cp ./frontend/dist s3://learning-phaser --recursive",
+    "cloudfront:invalidate": "aws cloudfront create-invalidation --distribution-id ERD3D10KB2404 --paths '/*'",
+    "deploy:frontend": "pnpm s3:cp && pnpm cloudfront:invalidate"
+  },
   "packageManager": "pnpm@9.9.0"
 }

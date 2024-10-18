@@ -78,11 +78,39 @@ https://192.168.0.3:8080/
 
 
 ## ⚡️ Deploy
+### Application
+```bash
+cd frontend
+pnpm run build
+
+cd ..
+pnpm run deploy:frontend
+```
+
+This is because, although we updated the static files in the S3 bucket, the CloudFront distribution we access our website from has cached the static files and served the cached pages.
+
+The thing to do is to invalidate the cache on the CloudFront distribution every time you update the static files in the S3 bucket.
+
+### Infrastructure
+#### First time
 ```bash
 cd infra
-cdk bootstrap # only first time
+cdk bootstrap
 cdk synth
 cdk deploy
+```
+
+#### Second time and later
+```bash
+cd infra
+cdk synth
+cdk deploy
+```
+
+#### Delete infrastructure
+```bash
+cd infra
+cdk destroy
 ```
 
 
