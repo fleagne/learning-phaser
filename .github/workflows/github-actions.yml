@@ -14,16 +14,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Node.jsの設定（pnpmの使用のため）
+      # 2. pnpmを使用できるようにする
+      # https://github.com/pnpm/action-setup
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      # 3. Node.jsの設定
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
-
-      # 3. pnpmのインストール
-      - name: Install pnpm
-        run: npm install -g pnpm
 
       # 4. 依存関係のインストール
       - name: Install dependencies
