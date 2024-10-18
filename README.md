@@ -3,9 +3,7 @@ Learning to develop games using Phaser3
 
 
 ## 🎮 Let's play the Game!
-https://learning-phaser.pages.dev/
-
-=> Try to change AWS from Cloudflare now...
+https://d1mbl2iqjrkpy1.cloudfront.net
 
 
 ## 🤖 Technical Element
@@ -80,7 +78,12 @@ https://192.168.0.3:8080/
 
 
 ## ⚡️ Deploy
-Need to update...
+```bash
+cd infra
+cdk bootstrap # only first time
+cdk synth
+cdk deploy
+```
 
 
 ## 🧬 Libraries
