@@ -1,5 +1,5 @@
 {
-  "name": "infra",
+  "name": "learning-phaser-infra",
   "version": "0.1.0",
   "bin": {
     "infra": "bin/infra.js"
@@ -23,5 +23,6 @@
     "aws-cdk-lib": "2.162.1",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
-  }
+  },
+  "packageManager": "pnpm@9.9.0"
 }

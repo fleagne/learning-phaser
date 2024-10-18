@@ -18,6 +18,7 @@ https://learning-phaser.pages.dev/
 
 ## ⚙️ Install
 ```bash
+cd frontend
 pnpm install
 pnpm run dev
 ```
@@ -79,9 +80,7 @@ https://192.168.0.3:8080/
 
 
 ## ⚡️ Deploy
-```bash
-pnpm run deploy
-```
+Need to update...
 
 
 ## 🧬 Libraries

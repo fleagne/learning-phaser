@@ -1,0 +1,16 @@
+{
+  "name": "learning-phaser",
+  "description": "Learning Phaser 3",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fleagne/learning-phaser"
+  },
+  "author": "Toshinori Suzuki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fleagne/learning-phaser/issues"
+  },
+  "homepage": "https://learning-phaser.pages.dev/",
+  "packageManager": "pnpm@9.9.0"
+}
