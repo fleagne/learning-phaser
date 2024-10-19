@@ -14,11 +14,12 @@ export class Game extends Scene {
   player: Player;
   enemiesGroup: EnemiesGroup;
   keysGroup: KeysGroup;
+  getKeys: number = 0;
   leftKeys: number;
   leftKeysDivElement: HTMLElement | null;
   goal: Goal;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-  acceleration: { x: number; y: number; z: number };
+  acceleration?: { x: number; y: number; z: number };
 
   constructor() {
     super("Game");
@@ -64,6 +65,9 @@ export class Game extends Scene {
 
     // 残りの鍵の表示をするためのエレメントを取得
     this.leftKeysDivElement = document.getElementById("left-keys");
+    this.leftKeysDivElement!.innerText = `取得した鍵: [ ${"⚪ ".repeat(
+      this.leftKeys
+    )}]`;
 
     // ゴールの作成
     const goal = this.map
@@ -88,6 +92,14 @@ export class Game extends Scene {
       if (key instanceof KeySprite && !key.collecting) {
         key.collect();
         this.leftKeys -= 1;
+        this.getKeys += 1;
+        this.leftKeysDivElement!.innerText = `取得した鍵: [ ${"🔑 ".repeat(
+          this.getKeys
+        )}${"⚪ ".repeat(this.leftKeys)}]`;
+        // 鍵をすべて集めたら、扉を消す
+        if (this.leftKeys === 0) {
+          this.map.getTilemap().replaceByIndex(78, 0);
+        }
       }
     });
 
@@ -107,115 +119,14 @@ export class Game extends Scene {
         const data = JSON.parse(event.data);
         this.updateAcceleration(data.message.acceleration);
       };
-
-      const button = document.getElementById("button");
-      if (button) {
-        const addElemAcceleration = document.createElement("div");
-        addElemAcceleration.setAttribute("id", "acceleration");
-        addElemAcceleration.innerText = `Acceleration:\nX: ${this.acceleration.x}\nY: ${this.acceleration.y}\nZ: ${this.acceleration.z}`;
-        button.parentNode?.insertBefore(
-          addElemAcceleration,
-          button.nextElementSibling
-        );
-
-        const addElemExplanation = document.createElement("div");
-        addElemExplanation.innerText =
-          "端末の角度によって、キャラクターを動かせます\nXが-2以下:左  Xが2以上:右\nZが-9以下:上  Zが-2以上:下\n";
-        button.parentNode?.insertBefore(
-          addElemExplanation,
-          button.nextElementSibling
-        );
-      }
     }
   }
 
   update() {
-    // プレイヤー側の移動判定
-    if (!this.cursors) return;
+    if (!this.cursors || !this.groundLayer) return;
 
-    // 左移動時の処理
-    if (
-      this.input.keyboard?.checkDown(this.cursors.left, 300) ||
-      this.acceleration.x <= -2
-    ) {
-      this.acceleration.x = 0;
-      const tile = this.groundLayer?.getTileAtWorldXY(
-        this.player.x - Constants.TILE_SIZE,
-        this.player.y,
-        true
-      );
-      if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
-        this.player.x -= Constants.TILE_SIZE;
-        this.player.anims.play("left", true);
-      }
-      if (tile?.index === 12) {
-        this.cameras.main.pan(0, 0, 500, "Power2");
-        this.player.x -= Constants.TILE_SIZE;
-        this.player.anims.play("left", true);
-      }
-
-      // 右移動時の処理
-    } else if (
-      this.input.keyboard?.checkDown(this.cursors.right, 300) ||
-      this.acceleration.x >= 2
-    ) {
-      this.acceleration.x = 0;
-      const tile = this.groundLayer?.getTileAtWorldXY(
-        this.player.x + Constants.TILE_SIZE,
-        this.player.y,
-        true
-      );
-      if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
-        this.player.x += Constants.TILE_SIZE;
-        this.player.anims.play("right", true);
-      }
-      if (tile?.index === 12) {
-        this.cameras.main.pan(this.map.widthInPixels, 0, 500, "Power2");
-        this.player.x += Constants.TILE_SIZE;
-        this.player.anims.play("right", true);
-      }
-
-      // 上移動時の処理
-    } else if (
-      this.input.keyboard?.checkDown(this.cursors.up, 300) ||
-      this.acceleration.z <= -9
-    ) {
-      this.acceleration.z = -5;
-      const tile = this.groundLayer?.getTileAtWorldXY(
-        this.player.x,
-        this.player.y - Constants.TILE_SIZE,
-        true
-      );
-      if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
-        this.player.y -= Constants.TILE_SIZE;
-        this.player.anims.play("up", true);
-      }
-
-      // 下移動時の処理
-    } else if (
-      this.input.keyboard?.checkDown(this.cursors.down, 300) ||
-      this.acceleration.z >= -2
-    ) {
-      this.acceleration.z = -5;
-      const tile = this.groundLayer?.getTileAtWorldXY(
-        this.player.x,
-        this.player.y + Constants.TILE_SIZE,
-        true
-      );
-      if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
-        this.player.y += Constants.TILE_SIZE;
-        this.player.anims.play("down", true);
-      }
-    } else {
-      // this.player.anims.stop();
-    }
-
-    this.leftKeysDivElement!.innerText = `残りの鍵: ${this.leftKeys}`;
-
-    // 鍵をすべて集めたら、扉を消す
-    if (this.leftKeys === 0) {
-      this.map.getTilemap().replaceByIndex(78, 0);
-    }
+    // プレイヤーの移動判定
+    this.player.update(this, this.cursors, this.groundLayer, this.acceleration);
   }
 
   updateAcceleration(acceleration: { x: number; y: number; z: number }) {

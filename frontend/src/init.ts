@@ -10,7 +10,7 @@ export function init() {
       // @ts-ignore
       DeviceMotionEvent.requestPermission().then((permissionState: string) => {
         if (permissionState === "granted") {
-          document.getElementById("button")?.remove();
+          document.getElementById("button")!.innerText = "スマホの傾きで操作中..."
 
           window.addEventListener(
             "devicemotion",
@@ -45,7 +45,7 @@ export function init() {
     button.setAttribute("id", "button");
     button.addEventListener("click", deviceMotionRequest);
     button.classList.add("button");
-    button.innerText = "スマホで操作する";
+    button.innerText = "スマホで操作する（バグあり）";
 
     div?.appendChild(button);
   }
@@ -56,5 +56,5 @@ export function init() {
         JSON.stringify({ id: "id", to: uuidGame, message: { acceleration } })
       );
     }
-  }, 400);
+  }, 300);
 }
