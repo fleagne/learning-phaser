@@ -3,7 +3,7 @@ Learning to develop games using Phaser3
 
 
 ## 🎮 Let's play the Game!
-https://d1mbl2iqjrkpy1.cloudfront.net
+https://d24yw56dty79bo.cloudfront.net/
 
 
 ## 🤖 Technical Element

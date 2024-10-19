@@ -23,7 +23,7 @@ export class ApiGatewayConstruct extends Construct {
 
     // 各CRUD操作用のAPI Gatewayリソースを作成する。
     const api = new apiGateway.RestApi(this, 'usersApi', {
-      restApiName: 'Users Service'
+      restApiName: `Users Service ${props.envName}`
     });
 
     const users = api.root.addResource('users');

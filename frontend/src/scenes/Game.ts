@@ -1,6 +1,8 @@
 import { Scene } from "phaser";
 import { Constants } from "../components/constants";
 import EnemiesGroup from "../components/enemies/enemiesGroup";
+import KeySprite from "../components/keys/key";
+import KeysGroup from "../components/keys/keysGroup";
 import Map from "../components/map";
 import Player from "../components/player/player";
 import { uuidGame, uuidWebSocket } from "../main";
@@ -10,9 +12,10 @@ export class Game extends Scene {
   groundLayer: Phaser.Tilemaps.TilemapLayer | null;
   player: Player;
   enemiesGroup: EnemiesGroup;
+  keysGroup: KeysGroup;
+  leftKeys: number;
+  leftKeysDivElement: HTMLElement | null;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-  key: Phaser.GameObjects.Text;
-  leftKey: number;
   accelerationX: number;
   accelerationY: number;
   accelerationZ: number;
@@ -21,14 +24,9 @@ export class Game extends Scene {
     super("Game");
   }
 
-  init() {
-    // 初期の鍵の数を定義
-    this.leftKey = 6;
-  }
+  init() {}
 
-  preload() {
-    // Nothing
-  }
+  preload() {}
 
   create() {
     this.map = new Map(this, "map01");
@@ -57,6 +55,15 @@ export class Game extends Scene {
       this.groundLayer
     );
 
+    // 鍵の作成
+    this.keysGroup = new KeysGroup(this, this.map.getTilemap());
+
+    // 鍵の残りの数を定義
+    this.leftKeys = this.keysGroup.getLength();
+
+    // 残りの鍵の表示をする
+    this.leftKeysDivElement = document.getElementById("left-keys");
+
     // 衝突判定
     this.physics.add.collider(this.groundLayer, this.player);
     this.physics.add.collider(this.groundLayer, this.enemiesGroup);
@@ -66,12 +73,13 @@ export class Game extends Scene {
       this.scene.start("GameOver");
     });
 
-    this.key = this.add.text(
-      (this.game.config.width as number) - 112,
-      16,
-      `残りの鍵: ${this.leftKey}`,
-      { font: "16px Courier" }
-    );
+    // プレイヤーと鍵の衝突判定
+    this.physics.add.overlap(this.player, this.keysGroup, (_, key) => {
+      if (key instanceof KeySprite && !key.collecting) {
+        key.collect();
+        this.leftKeys -= 1;
+      }
+    });
 
     // スマートフォンでアクセスしている場合は、WebSocketサーバにアクセスし、加速度情報を取得する
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
@@ -127,15 +135,8 @@ export class Game extends Scene {
       }
       if (tile?.index === 12) {
         this.cameras.main.pan(0, 0, 500, "Power2");
-        this.key.setPosition((this.game.config.width as number) - 112, 16);
         this.player.x -= Constants.TILE_SIZE;
         this.player.anims.play("left", true);
-      }
-      if (tile?.index === 13) {
-        this.key.setText(`残りの鍵: ${--this.leftKey}`);
-        this.map
-          .getTilemap()
-          .replaceByIndex(tile.index, 0, tile.x, tile.y, 1, 1);
       }
       if (tile?.index === 14) {
         this.scene.start("GameClear");
@@ -158,15 +159,8 @@ export class Game extends Scene {
       }
       if (tile?.index === 12) {
         this.cameras.main.pan(this.map.widthInPixels, 0, 500, "Power2");
-        this.key.setPosition(this.map.widthInPixels - 112, 16);
         this.player.x += Constants.TILE_SIZE;
         this.player.anims.play("right", true);
-      }
-      if (tile?.index === 13) {
-        this.key.setText(`残りの鍵: ${--this.leftKey}`);
-        this.map
-          .getTilemap()
-          .replaceByIndex(tile.index, 0, tile.x, tile.y, 1, 1);
       }
       if (tile?.index === 14) {
         this.scene.start("GameClear");
@@ -187,12 +181,6 @@ export class Game extends Scene {
         this.player.y -= Constants.TILE_SIZE;
         this.player.anims.play("up", true);
       }
-      if (tile?.index === 13) {
-        this.key.setText(`残りの鍵: ${--this.leftKey}`);
-        this.map
-          .getTilemap()
-          .replaceByIndex(tile.index, 0, tile.x, tile.y, 1, 1);
-      }
       if (tile?.index === 14) {
         this.scene.start("GameClear");
       }
@@ -212,12 +200,6 @@ export class Game extends Scene {
         this.player.y += Constants.TILE_SIZE;
         this.player.anims.play("down", true);
       }
-      if (tile?.index === 13) {
-        this.key.setText(`残りの鍵: ${--this.leftKey}`);
-        this.map
-          .getTilemap()
-          .replaceByIndex(tile.index, 0, tile.x, tile.y, 1, 1);
-      }
       if (tile?.index === 14) {
         this.scene.start("GameClear");
       }
@@ -225,8 +207,10 @@ export class Game extends Scene {
       // this.player.anims.stop();
     }
 
+    this.leftKeysDivElement!.innerText = `残りの鍵: ${this.leftKeys}`;
+
     // 鍵をすべて集めたら、扉を消す
-    if (this.leftKey === 0) {
+    if (this.leftKeys === 0) {
       this.map.getTilemap().replaceByIndex(78, 0);
     }
   }
