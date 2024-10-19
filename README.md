@@ -90,21 +90,21 @@ The thing to do is to invalidate the cache on the CloudFront distribution every 
 ```bash
 cd infra
 cdk bootstrap
-cdk synth
-cdk deploy
+cdk synth -c environment=dev
+cdk deploy -c environment=dev
 ```
 
 #### Second time and later
 ```bash
 cd infra
-cdk synth
-cdk deploy
+cdk synth -c environment=dev
+cdk deploy -c environment=dev
 ```
 
 #### Delete infrastructure
 ```bash
 cd infra
-cdk destroy
+cdk destroy -c environment=dev
 ```
 
 

@@ -1,18 +1,20 @@
-#!/usr/bin/env node
-import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
-import { InfraStack } from "../lib/infra-stack";
-
+import "source-map-support/register";
+import { AppParameter, devParameter, prdParameter } from "./parameter";
+import { LearningPhaserStack } from "../lib/stack/LearningPhaserStack";
 const app = new cdk.App();
-new InfraStack(app, "InfraStack", {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+
+// Dynamic ID Pattern
+const argContext = "environment";
+
+// https://docs.aws.amazon.com/ja_jp/cdk/v2/guide/get_context_var.html
+// cdk synth -c environment=dev
+const envKey = app.node.tryGetContext(argContext);
+const parameters = [devParameter, prdParameter];
+const appParameter: AppParameter = parameters.filter(
+  (obj: AppParameter) => obj.envName.toLocaleLowerCase() === envKey
+)[0];
+
+new LearningPhaserStack(app, `${appParameter.envName}LearningPhaserStack`, {
+  ...appParameter,
 });

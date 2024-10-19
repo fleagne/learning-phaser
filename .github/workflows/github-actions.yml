@@ -50,8 +50,8 @@ jobs:
 
       # 7. S3にファイルをアップロード
       - name: Upload to S3
-        run: aws s3 cp ./frontend/dist s3://learning-phaser --recursive
+        run: aws s3 cp ./frontend/dist s3://learning-phaser-dev --recursive
 
       # 8. CloudFrontキャッシュのインバリデート
       - name: Invalidate CloudFront cache
-        run: aws cloudfront create-invalidation --distribution-id ERD3D10KB2404 --paths "/*"
+        run: aws cloudfront create-invalidation --distribution-id E173G4IEFJEA9U --paths "/*"
