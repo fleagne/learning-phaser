@@ -1,6 +1,7 @@
 import { Scene } from "phaser";
 import { Constants } from "../components/constants";
 import EnemiesGroup from "../components/enemies/enemiesGroup";
+import Goal from "../components/goal/goal";
 import KeySprite from "../components/keys/key";
 import KeysGroup from "../components/keys/keysGroup";
 import Map from "../components/map";
@@ -15,10 +16,9 @@ export class Game extends Scene {
   keysGroup: KeysGroup;
   leftKeys: number;
   leftKeysDivElement: HTMLElement | null;
+  goal: Goal;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-  accelerationX: number;
-  accelerationY: number;
-  accelerationZ: number;
+  acceleration: { x: number; y: number; z: number };
 
   constructor() {
     super("Game");
@@ -40,6 +40,7 @@ export class Game extends Scene {
       Constants.TILE_SIZE * 1 * 12
     );
 
+    // 非衝突のオブジェクトを設定する
     this.groundLayer.setCollisionByExclusion(Constants.EXCLUDE_COLLIDE_INDEXES);
 
     // キーボードによる入力を受け付けられるようにする
@@ -61,8 +62,17 @@ export class Game extends Scene {
     // 鍵の残りの数を定義
     this.leftKeys = this.keysGroup.getLength();
 
-    // 残りの鍵の表示をする
+    // 残りの鍵の表示をするためのエレメントを取得
     this.leftKeysDivElement = document.getElementById("left-keys");
+
+    // ゴールの作成
+    const goal = this.map
+      .getTilemap()
+      .findTile((tile: Phaser.Tilemaps.Tile) => tile.index === 14);
+    if (!goal) {
+      throw new Error("ゴールが見つかりませんでした。");
+    }
+    this.goal = new Goal(this, goal.x, goal.y);
 
     // 衝突判定
     this.physics.add.collider(this.groundLayer, this.player);
@@ -81,6 +91,11 @@ export class Game extends Scene {
       }
     });
 
+    // プレイヤーとゴールの衝突判定
+    this.physics.add.overlap(this.player, this.goal, () => {
+      this.scene.start("GameClear");
+    });
+
     // スマートフォンでアクセスしている場合は、WebSocketサーバにアクセスし、加速度情報を取得する
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
       const ws = new WebSocket(`wss://cloud.achex.ca/${uuidWebSocket}`);
@@ -97,7 +112,7 @@ export class Game extends Scene {
       if (button) {
         const addElemAcceleration = document.createElement("div");
         addElemAcceleration.setAttribute("id", "acceleration");
-        addElemAcceleration.innerText = `Acceleration:\nX: ${this.accelerationX}\nY: ${this.accelerationY}\nZ: ${this.accelerationZ}`;
+        addElemAcceleration.innerText = `Acceleration:\nX: ${this.acceleration.x}\nY: ${this.acceleration.y}\nZ: ${this.acceleration.z}`;
         button.parentNode?.insertBefore(
           addElemAcceleration,
           button.nextElementSibling
@@ -121,9 +136,9 @@ export class Game extends Scene {
     // 左移動時の処理
     if (
       this.input.keyboard?.checkDown(this.cursors.left, 300) ||
-      this.accelerationX <= -2
+      this.acceleration.x <= -2
     ) {
-      this.accelerationX = 0;
+      this.acceleration.x = 0;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x - Constants.TILE_SIZE,
         this.player.y,
@@ -138,16 +153,13 @@ export class Game extends Scene {
         this.player.x -= Constants.TILE_SIZE;
         this.player.anims.play("left", true);
       }
-      if (tile?.index === 14) {
-        this.scene.start("GameClear");
-      }
 
       // 右移動時の処理
     } else if (
       this.input.keyboard?.checkDown(this.cursors.right, 300) ||
-      this.accelerationX >= 2
+      this.acceleration.x >= 2
     ) {
-      this.accelerationX = 0;
+      this.acceleration.x = 0;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x + Constants.TILE_SIZE,
         this.player.y,
@@ -162,16 +174,13 @@ export class Game extends Scene {
         this.player.x += Constants.TILE_SIZE;
         this.player.anims.play("right", true);
       }
-      if (tile?.index === 14) {
-        this.scene.start("GameClear");
-      }
 
       // 上移動時の処理
     } else if (
       this.input.keyboard?.checkDown(this.cursors.up, 300) ||
-      this.accelerationZ <= -9
+      this.acceleration.z <= -9
     ) {
-      this.accelerationZ = -5;
+      this.acceleration.z = -5;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x,
         this.player.y - Constants.TILE_SIZE,
@@ -181,16 +190,13 @@ export class Game extends Scene {
         this.player.y -= Constants.TILE_SIZE;
         this.player.anims.play("up", true);
       }
-      if (tile?.index === 14) {
-        this.scene.start("GameClear");
-      }
 
       // 下移動時の処理
     } else if (
       this.input.keyboard?.checkDown(this.cursors.down, 300) ||
-      this.accelerationZ >= -2
+      this.acceleration.z >= -2
     ) {
-      this.accelerationZ = -5;
+      this.acceleration.z = -5;
       const tile = this.groundLayer?.getTileAtWorldXY(
         this.player.x,
         this.player.y + Constants.TILE_SIZE,
@@ -199,9 +205,6 @@ export class Game extends Scene {
       if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
         this.player.y += Constants.TILE_SIZE;
         this.player.anims.play("down", true);
-      }
-      if (tile?.index === 14) {
-        this.scene.start("GameClear");
       }
     } else {
       // this.player.anims.stop();
@@ -217,13 +220,15 @@ export class Game extends Scene {
 
   updateAcceleration(acceleration: { x: number; y: number; z: number }) {
     // 受信した加速度情報を表示
-    this.accelerationX = Math.floor(acceleration.x);
-    this.accelerationY = Math.floor(acceleration.y);
-    this.accelerationZ = Math.floor(acceleration.z);
+    this.acceleration = {
+      x: Math.floor(acceleration.x),
+      y: Math.floor(acceleration.y),
+      z: Math.floor(acceleration.z),
+    };
 
     const accelerationElem = document.getElementById("acceleration");
     if (accelerationElem) {
-      accelerationElem.innerText = `Acceleration:\nX: ${this.accelerationX}\nY: ${this.accelerationY}\nZ: ${this.accelerationZ}`;
+      accelerationElem.innerText = `Acceleration:\nX: ${this.acceleration.x}\nY: ${this.acceleration.y}\nZ: ${this.acceleration.z}`;
     }
   }
 }
