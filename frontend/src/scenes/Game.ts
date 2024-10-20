@@ -1,10 +1,13 @@
 import { Scene } from "phaser";
 import { Constants } from "../components/constants";
+import Controls from "../components/controls/controls";
 import EnemiesGroup from "../components/enemies/enemiesGroup";
 import Goal from "../components/goal/goal";
 import KeySprite from "../components/keys/key";
 import KeysGroup from "../components/keys/keysGroup";
 import Map from "../components/map";
+import PickaxeSprite from "../components/pickaxes/pickaxes";
+import PickaxesGroup from "../components/pickaxes/pickaxesGroup";
 import Player from "../components/player/player";
 import { uuidGame, uuidWebSocket } from "../main";
 
@@ -12,13 +15,17 @@ export class Game extends Scene {
   map: Map;
   groundLayer: Phaser.Tilemaps.TilemapLayer | null;
   player: Player;
+  goal: Goal;
   enemiesGroup: EnemiesGroup;
   keysGroup: KeysGroup;
   getKeys: number = 0;
   leftKeys: number;
   leftKeysDivElement: HTMLElement | null;
-  goal: Goal;
+  pickaxesGroup: PickaxesGroup;
+  getPickaxes: number = 0;
+  getPickaxesDivElement: HTMLElement | null;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
+  controls?: Controls;
   acceleration?: { x: number; y: number; z: number };
 
   constructor() {
@@ -47,8 +54,14 @@ export class Game extends Scene {
     // キーボードによる入力を受け付けられるようにする
     this.cursors = this.input.keyboard?.createCursorKeys();
 
+    // コントローラーによる入力を受け付けられるようにする
+    this.controls = new Controls();
+
     // プレイヤーの作成
     this.player = new Player(this, 0, 1);
+
+    // ゴールの作成
+    this.goal = new Goal(this, this.map.getTilemap());
 
     // 敵の作成
     this.enemiesGroup = new EnemiesGroup(
@@ -69,8 +82,12 @@ export class Game extends Scene {
       this.leftKeys
     )}]`;
 
-    // ゴールの作成
-    this.goal = new Goal(this, this.map.getTilemap());
+    // ピッケルの作成
+    this.pickaxesGroup = new PickaxesGroup(this, this.map.getTilemap());
+
+    // 獲得したピッケルの表示をするためのエレメントを取得
+    this.getPickaxesDivElement = document.getElementById("pickaxes");
+    this.getPickaxesDivElement!.innerText = `ピッケル(Xで方向を選択し、Aで使用): [ ]`;
 
     // 衝突判定
     this.physics.add.collider(this.groundLayer, this.player);
@@ -97,6 +114,17 @@ export class Game extends Scene {
       }
     });
 
+    // プレイヤーとピッケルの衝突判定
+    this.physics.add.overlap(this.player, this.pickaxesGroup, (_, pickaxe) => {
+      if (pickaxe instanceof PickaxeSprite && !pickaxe.collecting) {
+        pickaxe.collect();
+        this.getPickaxes += 1;
+        this.getPickaxesDivElement!.innerText = `ピッケル(Xで方向を選択し、Aで使用): [ ${"⛏️ ".repeat(
+          this.getPickaxes
+        )}]`;
+      }
+    });
+
     // プレイヤーとゴールの衝突判定
     this.physics.add.overlap(this.player, this.goal, () => {
       this.scene.start("GameClear");
@@ -117,10 +145,21 @@ export class Game extends Scene {
   }
 
   update() {
-    if (!this.cursors || !this.groundLayer) return;
+    if (!this.cursors || !this.controls || !this.groundLayer) return;
 
     // プレイヤーの移動判定
-    this.player.update(this, this.cursors, this.groundLayer, this.acceleration);
+    this.player.update(
+      this,
+      this.cursors,
+      this.controls,
+      this.map.getTilemap(),
+      this.groundLayer,
+      this.getPickaxes,
+      this.getPickaxesDivElement
+    );
+
+    // コントローラーの初期化処理
+    this.controls.update();
   }
 
   updateAcceleration(acceleration: { x: number; y: number; z: number }) {

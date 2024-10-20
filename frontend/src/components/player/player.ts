@@ -1,15 +1,12 @@
 import { Scene } from "phaser";
 import { Constants } from "../constants";
+import Controls from "../controls/controls";
+import SpeechBubble from "../speechBubble/speechBubble";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   declare body: Phaser.Physics.Arcade.Body;
+  marker: Phaser.GameObjects.Graphics;
   private canMove: boolean = true;
-  private startX: number = 0;
-  private startY: number = 0;
-  private endX: number = 0;
-  private endY: number = 0;
-  private swipeThreshold: number = 150; // スワイプと判定する最小距離
-  private swipeDir: string = "";
 
   constructor(scene: Scene, x: number, y: number) {
     super(scene, 64 * x + 32, 64 * y + 32, "tile");
@@ -74,40 +71,100 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       frameRate: 2,
       repeat: -1,
     });
+
+    // 攻撃やつるはしなどの処理を行うためのマーカーを表示
+    this.marker = scene.add.graphics();
+    this.marker.lineStyle(4, 0x000000, 1);
+    this.marker.strokeRect(64 * x, 64 * y, 64, 64);
   }
 
   update(
     scene: Scene,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys,
+    controls: Controls,
+    map: Phaser.Tilemaps.Tilemap,
     groundLayer: Phaser.Tilemaps.TilemapLayer,
-    acceleration?: {
-      x: number;
-      y: number;
-      z: number;
-    }
+    getPickaxes: number,
+    getPickaxesDivElement: HTMLElement | null
   ) {
-    // pointerdown でタッチやクリックの開始地点を取得
-    scene.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-      this.startX = pointer.x;
-      this.startY = pointer.y;
-    });
+    // 基本的にマーカーは非表示
+    this.marker.setAlpha(0);
 
-    // pointerup でタッチやクリックの終了地点を取得
-    scene.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-      this.endX = pointer.x;
-      this.endY = pointer.y;
+    if (controls.xIsDown) {
+      if (getPickaxes === 0) {
+        new SpeechBubble(
+          scene,
+          this.x,
+          this.y,
+          "ピッケルがないよ！"
+        ).showBubble();
+        this.canMove = true;
+        controls.cancel();
+      }
+      if (controls.bIsDown) {
+        this.canMove = true;
+        controls.cancel();
+      }
+      if (controls.aIsDown) {
+        this.use(
+          "pickaxe",
+          map,
+          groundLayer,
+          getPickaxes,
+          getPickaxesDivElement
+        );
+        this.canMove = true;
+        controls.cancel();
+      }
+      this.canMove = false;
+      this.marker.setAlpha(1);
 
-      this.swipeDir = this.checkSwipe() ?? "";
-    });
+      if (this.anims.currentAnim?.key == "left") {
+        // プレイヤーの前方にマーカーを表示させる（左）
+        this.marker.x = this.x - 64 * 2 + 32;
+        this.marker.y = this.y - 64 * 1 - 32;
+      }
+
+      if (this.anims.currentAnim?.key == "right") {
+        // プレイヤーの前方にマーカーを表示させる（右）
+        this.marker.x = this.x + 64 * 0 + 32;
+        this.marker.y = this.y - 64 * 1 - 32;
+      }
+
+      if (this.anims.currentAnim?.key == "up") {
+        // プレイヤーの前方にマーカーを表示させる（上）
+        this.marker.x = this.x - 64 * 1 + 32;
+        this.marker.y = this.y - 64 * 2 - 32;
+      }
+
+      if (this.anims.currentAnim?.key == "down") {
+        // プレイヤーの前方にマーカーを表示させる（下）
+        this.marker.x = this.x - 64 * 1 + 32;
+        this.marker.y = this.y + 64 * 0 - 32;
+      }
+
+      if (cursors.left.isDown || controls.leftIsDown) {
+        this.anims.play("left", true);
+      }
+
+      if (cursors.right.isDown || controls.rightIsDown) {
+        this.anims.play("right", true);
+      }
+
+      if (cursors.up.isDown || controls.upIsDown) {
+        this.anims.play("up", true);
+      }
+
+      if (cursors.down.isDown || controls.downIsDown) {
+        this.anims.play("down", true);
+      }
+    }
 
     if (this.canMove) {
       // 左移動時の処理
-      if (
-        cursors.left.isDown ||
-        this.swipeDir === "left" ||
-        (acceleration && acceleration.x <= -2)
-      ) {
-        this.resetSwipe();
+      if (cursors.left.isDown || controls.leftIsDown) {
+        // プレイヤーの向きを左にする
+        this.anims.play("left", true);
         const tile = groundLayer.getTileAtWorldXY(
           this.x - Constants.TILE_SIZE,
           this.y,
@@ -115,22 +172,17 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         );
         if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
           this.x -= Constants.TILE_SIZE;
-          this.anims.play("left", true);
           this.canMove = false;
         }
         if (tile?.index === 12) {
           scene.cameras.main.pan(0, 0, 500, "Power2");
           this.x -= Constants.TILE_SIZE;
-          this.anims.play("left", true);
         }
 
         // 右移動時の処理
-      } else if (
-        cursors.right.isDown ||
-        this.swipeDir === "right" ||
-        (acceleration && acceleration.x >= 2)
-      ) {
-        this.resetSwipe();
+      } else if (cursors.right.isDown || controls.rightIsDown) {
+        // プレイヤーの向きを右にする
+        this.anims.play("right", true);
         const tile = groundLayer.getTileAtWorldXY(
           this.x + Constants.TILE_SIZE,
           this.y,
@@ -138,22 +190,17 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         );
         if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
           this.x += Constants.TILE_SIZE;
-          this.anims.play("right", true);
           this.canMove = false;
         }
         if (tile?.index === 12) {
           scene.cameras.main.pan(768 * 2, 0, 500, "Power2");
           this.x += Constants.TILE_SIZE;
-          this.anims.play("right", true);
         }
 
         // 上移動時の処理
-      } else if (
-        cursors.up.isDown ||
-        this.swipeDir === "up" ||
-        (acceleration && acceleration.z <= -9)
-      ) {
-        this.resetSwipe();
+      } else if (cursors.up.isDown || controls.upIsDown) {
+        // プレイヤーの向きを上にする
+        this.anims.play("up", true);
         const tile = groundLayer.getTileAtWorldXY(
           this.x,
           this.y - Constants.TILE_SIZE,
@@ -161,17 +208,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         );
         if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
           this.y -= Constants.TILE_SIZE;
-          this.anims.play("up", true);
           this.canMove = false;
         }
 
         // 下移動時の処理
-      } else if (
-        cursors.down.isDown ||
-        this.swipeDir === "down" ||
-        (acceleration && acceleration.z >= -2)
-      ) {
-        this.resetSwipe();
+      } else if (cursors.down.isDown || controls.downIsDown) {
+        // プレイヤーの向きを下にする
+        this.anims.play("down", true);
         const tile = groundLayer.getTileAtWorldXY(
           this.x,
           this.y + Constants.TILE_SIZE,
@@ -179,7 +222,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         );
         if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
           this.y += Constants.TILE_SIZE;
-          this.anims.play("down", true);
           this.canMove = false;
         }
       } else {
@@ -197,38 +239,34 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  // スワイプをチェックして、方向を判定
-  private checkSwipe() {
-    const deltaX = this.endX - this.startX;
-    const deltaY = this.endY - this.startY;
-
-    // 閾値を超える場合のみスワイプと判断
-    if (
-      Math.abs(deltaX) > this.swipeThreshold ||
-      Math.abs(deltaY) > this.swipeThreshold
-    ) {
-      // X方向のスワイプかY方向のスワイプかを判断
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (deltaX > 0) {
-          return "right";
-        } else {
-          return "left";
-        }
+  use(
+    name: string,
+    map: Phaser.Tilemaps.Tilemap,
+    groundLayer: Phaser.Tilemaps.TilemapLayer,
+    getPickaxes: number,
+    getPickaxesDivElement: HTMLElement | null
+  ) {
+    if (name === "pickaxe") {
+      const tile = groundLayer.getTileAtWorldXY(
+        this.marker.x,
+        this.marker.y + 64, // 補正する
+        true
+      );
+      console.log(tile);
+      if (tile?.index === 33) {
+        map.replaceByIndex(33, 0);
+        getPickaxes -= 1;
+        getPickaxesDivElement!.innerText = `ピッケル(Xで方向を選択し、Aで使用): [ ${"⛏️ ".repeat(
+          getPickaxes
+        )}]`;
       } else {
-        if (deltaY > 0) {
-          return "down";
-        } else {
-          return "up";
-        }
+        new SpeechBubble(
+          this.scene,
+          this.x,
+          this.y,
+          "このブロックには使えないみたい"
+        ).showBubble();
       }
     }
-  }
-
-  private resetSwipe() {
-    this.startX = 0;
-    this.startY = 0;
-    this.endX = 0;
-    this.endY = 0;
-    this.swipeDir = "";
   }
 }

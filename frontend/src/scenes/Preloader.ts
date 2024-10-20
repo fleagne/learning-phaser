@@ -47,6 +47,12 @@ export class Preloader extends Scene {
       frameHeight: 64,
     });
 
+    // ピッケルの画像
+    this.load.spritesheet("pickaxe", "images/pickaxe.png", {
+      frameWidth: 123,
+      frameHeight: 154,
+    });
+
     // マップのJSONファイルの読み込み
     this.load.tilemapTiledJSON("map01", "maps/map01.json");
   }

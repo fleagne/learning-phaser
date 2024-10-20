@@ -5,11 +5,17 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+      /** タップした際のズームを無効化する **/
+      html {
+        touch-action: manipulation;
+      }
+
       body {
         max-width: 768px;
         margin: 0 auto;
         padding: 0 20px;
       }
+
       .button {
         background-color: #3eb2fd;
         background-image: linear-gradient(1deg, #4f58fd, #149bf3 99%);
@@ -20,6 +26,186 @@
         line-height: 1.5;
         padding: 6px 20px;
       }
+
+      /** SFCのコントローラー **/
+      /** 下準備_ボタン **/
+      .btn {
+        border-style: none;
+        cursor: pointer;
+      }
+
+      /** 下準備_十字配置部品 **/
+      .cross-layout {
+        display: grid;
+        grid-template-columns: 30px 30px 30px;
+        grid-template-rows: 30px 30px 30px;
+      }
+
+      .cross-layout .position-top {
+        grid-row: 1 / 2;
+        grid-column: 2 / 3;
+      }
+
+      .cross-layout .position-left {
+        grid-row: 2 / 3;
+        grid-column: 1 / 2;
+      }
+
+      .cross-layout .position-center {
+        grid-row: 2 / 3;
+        grid-column: 2 / 3;
+      }
+
+      .cross-layout .position-right {
+        grid-row: 2 / 3;
+        grid-column: 3/4;
+      }
+
+      .cross-layout .position-bottom {
+        grid-row: 3 / 4;
+        grid-column: 2/3;
+      }
+
+      /** コントローラーの右側_ABXYボタン **/
+      .abxy-btn {
+        width: 30px;
+        height: 30px;
+
+        border-radius: 50%;
+
+        color: white;
+      }
+
+      .btn-x {
+        background-color: blue;
+      }
+
+      .btn-y {
+        background-color: green;
+      }
+
+      .btn-a {
+        background-color: red;
+      }
+
+      .btn-b {
+        background-color: yellow;
+      }
+
+      /** コントローラーの右側_ABXYボタンを灰色の円形で囲む **/
+      .abxy-btn-set {
+        display: inline-block;
+        padding: 10px;
+        background-color: rgba(66, 86, 123, 0.5);
+        border-radius: 50%;
+      }
+
+      /** コントローラーの右側_ABXYボタンを灰色の円形で囲んだものをさらに灰色の円形で囲む **/
+      .controller-right {
+        display: inline-block;
+        background-color: rgb(229, 227, 250);
+        padding: 20px;
+        border-radius: 50%;
+      }
+
+      /** コントローラーの左側_十字キー**/
+      .cross-key-btn {
+        width: 30px;
+        height: 30px;
+        background-color: rgba(66, 86, 123, 0.5);
+      }
+
+      .left-mark {
+        display: block;
+        transform: rotate(-90deg);
+      }
+
+      .right-mark {
+        display: block;
+        transform: rotate(90deg);
+      }
+
+      .bottom-mark {
+        display: block;
+        transform: rotate(180deg);
+      }
+
+      /**コントローラーの左側_十字キーを灰色の円形で囲む **/
+      .controller-left {
+        display: inline-block;
+        background-color: rgb(229, 227, 250);
+        padding: 30px;
+        border-radius: 50%;
+      }
+
+      /** コントローラーの真ん中_スタートボタン(セレクトボタン) **/
+      .selectstart-btn {
+        width: 10px;
+        height: 35px;
+        border-radius: 15%;
+        background-color: rgba(66, 86, 123, 0.5);
+
+        transform: rotate(30deg);
+      }
+
+      /** コントローラーの真ん中_スタートボタンとセレクトボタンを並べる**/
+      .selectstart-btn:first-child {
+        margin-right: 20px;
+      }
+
+      /** コントローラーの真ん中_Logoを書く領域を定義 **/
+      .logo-msg {
+        font-family: "Mina", sans-serif;
+      }
+
+      /** コントローラーの真ん中_スタートボタン・セレクトボタンとLogoを書く領域を一つにまとめる **/
+      .controller-center {
+        width: 220px;
+        height: 130px;
+        background-color: rgb(229, 227, 250);
+      }
+
+      .controller-center .logo-msg {
+        display: block;
+        width: 140px;
+        margin: auto;
+        padding-top: 20px;
+        text-align: center;
+
+        font-size: 0.8em;
+        color: gray;
+      }
+
+      .controller-center .selectstart-btn-set {
+        display: block;
+        width: 140px;
+        text-align: center;
+        margin: auto;
+        margin-top: 40px;
+      }
+
+      /** コントローラーの左側と真ん中と右側をくっつける **/
+      .spf-controller {
+        display: flex;
+        justify-content: center;
+      }
+
+      .spf-controller .controller-center {
+        margin-left: -80px;
+        margin-right: -80px;
+      }
+
+      .spf-controller .controller-center {
+        z-index: 1;
+      }
+
+      .spf-controller .controller-left {
+        z-index: 2;
+      }
+
+      .spf-controller .controller-right {
+        z-index: 2;
+      }
     </style>
     <title>Learning Phaser</title>
   </head>
@@ -29,11 +215,49 @@
     </div>
     <br />
     <div id="left-keys" style="text-align: right"></div>
-    <div id="smartphone-button" style="text-align: center"></div>
+    <div id="pickaxes" style="text-align: right"></div>
+    <div class="spf-controller">
+      <div class="controller-left">
+        <div class="cross-layout">
+          <button id="up-button" class="position-top btn cross-key-btn">
+            <span class="top-mark">▲</span>
+          </button>
+          <button id="left-button" class="position-left btn cross-key-btn">
+            <span class="left-mark">▲</span>
+          </button>
+          <button class="position-center btn cross-key-btn">
+            <span class="center-mark">●</span>
+          </button>
+          <button id="right-button" class="position-right btn cross-key-btn">
+            <span class="right-mark">▲</span>
+          </button>
+          <button id="down-button" class="position-bottom btn cross-key-btn">
+            <span class="bottom-mark">▲</span>
+          </button>
+        </div>
+      </div>
+      <div class="controller-center">
+        <span class="logo-msg">Controller</span>
+        <div class="selectstart-btn-set">
+          <button class="btn selectstart-btn"></button>
+          <button class="btn selectstart-btn"></button>
+        </div>
+      </div>
+      <div class="controller-right">
+        <div class="abxy-btn-set">
+          <div class="cross-layout">
+            <button id="x-button" class="btn abxy-btn position-top btn-x">X</button>
+            <button id="y-button" class="btn abxy-btn position-left btn-y">Y</button>
+            <button id="a-button" class="btn abxy-btn position-right btn-a">A</button>
+            <button id="b-button" class="btn abxy-btn position-bottom btn-b">B</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <br />
     <div id="buy-me-a-coffee" style="text-align: center">
       <a href="https://buymeacoffee.com/fleagne" target="_blank">
-        <img src="bmc-button.png" alt="Buy Me a Coffee" width="300px" />
+        <img src="bmc-button.png" alt="Buy Me a Coffee" width="200px" />
       </a>
     </div>
     <script type="module" src="/src/main.ts"></script>

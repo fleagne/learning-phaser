@@ -4,6 +4,7 @@ export class Constants {
   // "12" は部屋移動のタイルなので衝突しない。
   // "13" は鍵のタイルなので衝突しない
   // "14" はゴールのタイルなので衝突しない
-  static readonly EXCLUDE_COLLIDE_INDEXES = [-1, 0, 12, 13, 14];
+  // "99" はピッケルのタイルなので衝突しない
+  static readonly EXCLUDE_COLLIDE_INDEXES = [-1, 0, 12, 13, 14, 99];
   static readonly TILE_SIZE = 64;
 }
