@@ -18,7 +18,7 @@ export default class Goal extends Phaser.GameObjects.Group {
       (tile: Phaser.Tilemaps.Tile) => tile.index === 14
     );
 
-    let goals: Array<GoalSprite> = [];
+    const goals: Array<GoalSprite> = [];
     goalTypes?.forEach((goal) => {
       goals.push(new GoalSprite(scene, goal.x, goal.y));
     });

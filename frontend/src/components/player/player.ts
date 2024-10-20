@@ -2,6 +2,7 @@ import { Scene } from "phaser";
 import { Constants } from "../constants";
 import Controls from "../controls/controls";
 import SpeechBubble from "../speechBubble/speechBubble";
+import PickaxesGroup from "../pickaxes/pickaxesGroup";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   declare body: Phaser.Physics.Arcade.Body;
@@ -84,14 +85,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     controls: Controls,
     map: Phaser.Tilemaps.Tilemap,
     groundLayer: Phaser.Tilemaps.TilemapLayer,
-    getPickaxes: number,
-    getPickaxesDivElement: HTMLElement | null
+    pickaxesGroup: PickaxesGroup
   ) {
     // 基本的にマーカーは非表示
     this.marker.setAlpha(0);
 
     if (controls.xIsDown) {
-      if (getPickaxes === 0) {
+      if (pickaxesGroup.pickaxes === 0) {
         new SpeechBubble(
           scene,
           this.x,
@@ -106,13 +106,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         controls.cancel();
       }
       if (controls.aIsDown) {
-        this.use(
-          "pickaxe",
-          map,
-          groundLayer,
-          getPickaxes,
-          getPickaxesDivElement
-        );
+        this.use("pickaxe", map, groundLayer, pickaxesGroup);
         this.canMove = true;
         controls.cancel();
       }
@@ -243,8 +237,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     name: string,
     map: Phaser.Tilemaps.Tilemap,
     groundLayer: Phaser.Tilemaps.TilemapLayer,
-    getPickaxes: number,
-    getPickaxesDivElement: HTMLElement | null
+    pickaxesGroup: PickaxesGroup
   ) {
     if (name === "pickaxe") {
       const tile = groundLayer.getTileAtWorldXY(
@@ -252,13 +245,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.marker.y + 64, // 補正する
         true
       );
-      console.log(tile);
       if (tile?.index === 33) {
-        map.replaceByIndex(33, 0);
-        getPickaxes -= 1;
-        getPickaxesDivElement!.innerText = `ピッケル(Xで方向を選択し、Aで使用): [ ${"⛏️ ".repeat(
-          getPickaxes
-        )}]`;
+        map.replaceByIndex(tile.index, 0, tile.x, tile.y, 1, 1);
+        pickaxesGroup.use();
+        pickaxesGroup.showPickaxes();
       } else {
         new SpeechBubble(
           this.scene,

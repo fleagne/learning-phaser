@@ -1,4 +1,5 @@
 import PickaxeClass from "./pickaxeClass";
+import PickaxesGroup from "./pickaxesGroup";
 
 export default class PickaxeSprite extends PickaxeClass {
   public collecting: boolean = false;
@@ -12,7 +13,7 @@ export default class PickaxeSprite extends PickaxeClass {
     this.setDisplaySize(64, 64);
   }
 
-  collect() {
+  collect(pickaxesGroup: PickaxesGroup) {
     if (this.collecting) return;
     this.collecting = true;
     this.scene.tweens.add({
@@ -23,5 +24,7 @@ export default class PickaxeSprite extends PickaxeClass {
       ease: "Power2",
       onComplete: () => this.destroy(),
     });
+    pickaxesGroup.pickaxes += 1;
+    pickaxesGroup.showPickaxes();
   }
 }

@@ -22,8 +22,6 @@ export class Game extends Scene {
   leftKeys: number;
   leftKeysDivElement: HTMLElement | null;
   pickaxesGroup: PickaxesGroup;
-  getPickaxes: number = 0;
-  getPickaxesDivElement: HTMLElement | null;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   controls?: Controls;
   acceleration?: { x: number; y: number; z: number };
@@ -85,10 +83,6 @@ export class Game extends Scene {
     // ピッケルの作成
     this.pickaxesGroup = new PickaxesGroup(this, this.map.getTilemap());
 
-    // 獲得したピッケルの表示をするためのエレメントを取得
-    this.getPickaxesDivElement = document.getElementById("pickaxes");
-    this.getPickaxesDivElement!.innerText = `ピッケル(Xで方向を選択し、Aで使用): [ ]`;
-
     // 衝突判定
     this.physics.add.collider(this.groundLayer, this.player);
     this.physics.add.collider(this.groundLayer, this.enemiesGroup);
@@ -117,11 +111,7 @@ export class Game extends Scene {
     // プレイヤーとピッケルの衝突判定
     this.physics.add.overlap(this.player, this.pickaxesGroup, (_, pickaxe) => {
       if (pickaxe instanceof PickaxeSprite && !pickaxe.collecting) {
-        pickaxe.collect();
-        this.getPickaxes += 1;
-        this.getPickaxesDivElement!.innerText = `ピッケル(Xで方向を選択し、Aで使用): [ ${"⛏️ ".repeat(
-          this.getPickaxes
-        )}]`;
+        pickaxe.collect(this.pickaxesGroup);
       }
     });
 
@@ -154,8 +144,7 @@ export class Game extends Scene {
       this.controls,
       this.map.getTilemap(),
       this.groundLayer,
-      this.getPickaxes,
-      this.getPickaxesDivElement
+      this.pickaxesGroup,
     );
 
     // コントローラーの初期化処理

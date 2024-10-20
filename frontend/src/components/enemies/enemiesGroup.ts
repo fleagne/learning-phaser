@@ -9,7 +9,7 @@ export default class EnemiesGroup extends Phaser.GameObjects.Group {
       (tile: Phaser.Tilemaps.Tile) => tile.index === 104
     );
 
-    let enemies: Array<SlimeSprite> = [];
+    const enemies: Array<SlimeSprite> = [];
     enemyTypes?.forEach((enemy) => {
       enemies.push(new SlimeSprite(scene, enemy.x, enemy.y, groundLayer));
     });

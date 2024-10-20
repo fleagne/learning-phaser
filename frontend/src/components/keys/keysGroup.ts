@@ -9,7 +9,7 @@ export default class KeysGroup extends Phaser.GameObjects.Group {
       (tile: Phaser.Tilemaps.Tile) => tile.index === 13
     );
 
-    let keys: Array<KeySprite> = [];
+    const keys: Array<KeySprite> = [];
     keyTypes?.forEach((key) => {
       keys.push(new KeySprite(scene, key.x, key.y));
     });
