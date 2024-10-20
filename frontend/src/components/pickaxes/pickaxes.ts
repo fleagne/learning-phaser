@@ -1,3 +1,4 @@
+import { Constants } from "../constants";
 import PickaxeClass from "./pickaxeClass";
 import PickaxesGroup from "./pickaxesGroup";
 
@@ -10,7 +11,7 @@ export default class PickaxeSprite extends PickaxeClass {
     scene.physics.add.existing(this);
     this.setImmovable(true);
 
-    this.setDisplaySize(64, 64);
+    this.setDisplaySize(Constants.TILE_SIZE, Constants.TILE_SIZE);
   }
 
   collect(pickaxesGroup: PickaxesGroup) {

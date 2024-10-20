@@ -2,9 +2,9 @@ import { Scene } from "phaser";
 import { Constants } from "../constants";
 import Controls from "../controls/controls";
 import EnemiesGroup from "../enemies/enemiesGroup";
+import SlimeSprite from "../enemies/slime";
 import PickaxesGroup from "../pickaxes/pickaxesGroup";
 import SpeechBubble from "../speechBubble/speechBubble";
-import SlimeSprite from "../enemies/slime";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   declare body: Phaser.Physics.Arcade.Body;
@@ -18,7 +18,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   private mpElement: HTMLElement | null;
 
   constructor(scene: Scene, x: number, y: number) {
-    super(scene, 64 * x + 32, 64 * y + 32, "tile");
+    super(
+      scene,
+      Constants.TILE_SIZE * x + 32,
+      Constants.TILE_SIZE * y + 32,
+      "tile"
+    );
 
     // このコードは、スプライトをゲームのシーン（表示リスト）に追加します
     // これがないと、スプライトはメモリ上には存在しますが、画面に表示されません
@@ -38,7 +43,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // 衝突サイズの調整
     // プレイヤーのサイズ変更
-    this.setDisplaySize(64, 64);
+    this.setDisplaySize(Constants.TILE_SIZE, Constants.TILE_SIZE);
 
     // プレイヤーの最初の向きは右
     this.setFrame(52);
@@ -84,7 +89,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 攻撃やつるはしなどの処理を行うためのマーカーを表示
     this.marker = scene.add.graphics();
     this.marker.lineStyle(4, 0x000000, 1);
-    this.marker.strokeRect(64 * x, 64 * y, 64, 64);
+
+    // 枠線を表示。この補正値がなぜこうなるのかはまだよくわかっていない
+    this.marker.strokeRect(
+      Constants.TILE_SIZE * x * 0,
+      Constants.TILE_SIZE * y * 1,
+      Constants.TILE_SIZE,
+      Constants.TILE_SIZE
+    );
 
     // HPとMPを表示するためのエレメントを取得
     this.hpElement = document.getElementById("hp");
@@ -135,26 +147,26 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
       if (this.anims.currentAnim?.key == "left") {
         // プレイヤーの前方にマーカーを表示させる（左）
-        this.marker.x = this.x - 64 * 2 + 32;
-        this.marker.y = this.y - 64 * 1 - 32;
+        this.marker.x = this.x - Constants.TILE_SIZE * 2 + 32;
+        this.marker.y = this.y - Constants.TILE_SIZE * 1 - 32;
       }
 
       if (this.anims.currentAnim?.key == "right") {
         // プレイヤーの前方にマーカーを表示させる（右）
-        this.marker.x = this.x + 64 * 0 + 32;
-        this.marker.y = this.y - 64 * 1 - 32;
+        this.marker.x = this.x + Constants.TILE_SIZE * 0 + 32;
+        this.marker.y = this.y - Constants.TILE_SIZE * 1 - 32;
       }
 
       if (this.anims.currentAnim?.key == "up") {
         // プレイヤーの前方にマーカーを表示させる（上）
-        this.marker.x = this.x - 64 * 1 + 32;
-        this.marker.y = this.y - 64 * 2 - 32;
+        this.marker.x = this.x - Constants.TILE_SIZE * 1 + 32;
+        this.marker.y = this.y - Constants.TILE_SIZE * 2 - 32;
       }
 
       if (this.anims.currentAnim?.key == "down") {
         // プレイヤーの前方にマーカーを表示させる（下）
-        this.marker.x = this.x - 64 * 1 + 32;
-        this.marker.y = this.y + 64 * 0 - 32;
+        this.marker.x = this.x - Constants.TILE_SIZE * 1 + 32;
+        this.marker.y = this.y + Constants.TILE_SIZE * 0 - 32;
       }
 
       if (cursors.left.isDown || controls.leftIsDown) {
@@ -203,7 +215,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
             // 攻撃先に敵がいた場合は、敵にダメージを与える
             await enemiesGroup.checkAndHitEnemies(
               this.marker.x,
-              this.marker.y + 64,
+              this.marker.y + Constants.TILE_SIZE,
               1
             );
 
@@ -226,26 +238,26 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
       if (this.anims.currentAnim?.key == "left") {
         // プレイヤーの前方にマーカーを表示させる（左）
-        this.marker.x = this.x - 64 * 2 + 32;
-        this.marker.y = this.y - 64 * 1 - 32;
+        this.marker.x = this.x - Constants.TILE_SIZE * 2 + 32;
+        this.marker.y = this.y - Constants.TILE_SIZE * 1 - 32;
       }
 
       if (this.anims.currentAnim?.key == "right") {
         // プレイヤーの前方にマーカーを表示させる（右）
-        this.marker.x = this.x + 64 * 0 + 32;
-        this.marker.y = this.y - 64 * 1 - 32;
+        this.marker.x = this.x + Constants.TILE_SIZE * 0 + 32;
+        this.marker.y = this.y - Constants.TILE_SIZE * 1 - 32;
       }
 
       if (this.anims.currentAnim?.key == "up") {
         // プレイヤーの前方にマーカーを表示させる（上）
-        this.marker.x = this.x - 64 * 1 + 32;
-        this.marker.y = this.y - 64 * 2 - 32;
+        this.marker.x = this.x - Constants.TILE_SIZE * 1 + 32;
+        this.marker.y = this.y - Constants.TILE_SIZE * 2 - 32;
       }
 
       if (this.anims.currentAnim?.key == "down") {
         // プレイヤーの前方にマーカーを表示させる（下）
-        this.marker.x = this.x - 64 * 1 + 32;
-        this.marker.y = this.y + 64 * 0 - 32;
+        this.marker.x = this.x - Constants.TILE_SIZE * 1 + 32;
+        this.marker.y = this.y + Constants.TILE_SIZE * 0 - 32;
       }
 
       if (cursors.left.isDown || controls.leftIsDown) {
@@ -308,6 +320,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
           scene.cameras.main.pan(0, 0, 500, "Power2");
           this.x -= Constants.TILE_SIZE;
         }
+        if (tile?.index === 89) {
+          this.hit(1);
+        }
 
         // 右移動時の処理
       } else if (cursors.right.isDown || controls.rightIsDown) {
@@ -350,6 +365,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
           scene.cameras.main.pan(768 * 2, 0, 500, "Power2");
           this.x += Constants.TILE_SIZE;
         }
+        if (tile?.index === 89) {
+          this.hit(1);
+        }
 
         // 上移動時の処理
       } else if (cursors.up.isDown || controls.upIsDown) {
@@ -387,6 +405,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
           enemiesGroup.action(this, groundLayer);
         } else {
           isBlock = false;
+        }
+        if (tile?.index === 89) {
+          this.hit(1);
         }
 
         // 下移動時の処理
@@ -426,6 +447,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         } else {
           isBlock = false;
         }
+        if (tile?.index === 89) {
+          this.hit(1);
+        }
+
       } else {
         // Nothing to do
       }
@@ -450,7 +475,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     if (name === "pickaxe") {
       const tile = groundLayer.getTileAtWorldXY(
         this.marker.x,
-        this.marker.y + 64, // 補正する
+        this.marker.y + Constants.TILE_SIZE, // 補正する
         true
       );
       if (tile?.index === 33) {
@@ -471,7 +496,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   attack(groundLayer: Phaser.Tilemaps.TilemapLayer) {
     const tile = groundLayer.getTileAtWorldXY(
       this.marker.x,
-      this.marker.y + 64, // 補正する
+      this.marker.y + Constants.TILE_SIZE, // 補正する
       true
     );
     if (tile?.index === 98) {

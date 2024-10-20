@@ -18,8 +18,8 @@ import { Game, Types } from "phaser";
 // ゲームコンフィグについての詳細はこちら：
 // https://newdocs.phaser.io/docs/3.86.0/Phaser.Types.Core.GameConfig
 const config: Types.Core.GameConfig = {
-  width: 768,                                                        // ゲームの幅（ゲームピクセル単位）
-  height: 768,                                                       // ゲームの高さ（ゲームピクセル単位）
+  width: 704,                                                        // ゲームの幅（ゲームピクセル単位）
+  height: 576,                                                       // ゲームの高さ（ゲームピクセル単位）
   zoom: 1,                                                           // ゲームキャンバスに適用される単純なスケールサイズ。0.5にすると半分のサイズになる
   type: Phaser.AUTO,                                                 // 使用するレンダラー
   parent: "game-container",                                          // ゲームキャンバスを描画するためのDOM要素のID

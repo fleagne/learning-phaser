@@ -7,13 +7,13 @@ export class Preloader extends Scene {
 
   init() {
     // この画像をブートシーンにロードしたので、ここに表示することができる
-    this.add.image(384, 384, "background");
+    this.add.image(352, 288, "background");
 
     // シンプルなプログレスバーの輪郭
-    this.add.rectangle(384, 384, 468, 32).setStrokeStyle(1, 0xffffff);
+    this.add.rectangle(352, 288, 468, 32).setStrokeStyle(1, 0xffffff);
 
     // プログレス・バーそのもの。進捗率に応じて左から大きくなる
-    const bar = this.add.rectangle(384 - 230, 384, 4, 28, 0xffffff);
+    const bar = this.add.rectangle(352 - 230, 288, 4, 28, 0xffffff);
 
     // LoaderPluginが発する 'progress' イベントを使ってローディング・バーを更新する
     this.load.on("progress", (progress: number) => {

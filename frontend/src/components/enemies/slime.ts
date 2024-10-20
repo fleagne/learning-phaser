@@ -17,7 +17,7 @@ export default class SlimeSprite extends EnemyClass {
 
     // 衝突サイズの調整
     // 敵キャラのサイズ変更
-    this.setDisplaySize(64, 64);
+    this.setDisplaySize(Constants.TILE_SIZE, Constants.TILE_SIZE);
 
     // 敵キャラのフレームを指定
     this.setFrame(0);
@@ -32,9 +32,9 @@ export default class SlimeSprite extends EnemyClass {
     this.hpText = scene.add.text(
       this.x - 32,
       this.y - 32,
-      `HP: ${this.hp} / ${this.maxHp}`,
+      `HP: ${this.hp}/${this.maxHp}`,
       {
-        fontSize: "12px",
+        fontSize: "16px",
         color: "#FFFFFF",
       }
     );
@@ -100,7 +100,7 @@ export default class SlimeSprite extends EnemyClass {
 
   hit(point: number) {
     this.hp -= point;
-    this.hpText.setText(`HP: ${this.hp} / ${this.maxHp}`);
+    this.hpText.setText(`HP: ${this.hp}/${this.maxHp}`);
     if (this.hp <= 0) {
       this.kill();
     }

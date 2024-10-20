@@ -42,8 +42,8 @@ export class Game extends Scene {
     }
 
     this.groundLayer.setDisplaySize(
-      Constants.TILE_SIZE * 1 * 24,
-      Constants.TILE_SIZE * 1 * 12
+      Constants.TILE_SIZE * 1 * Constants.SINGLE_MAP_WIDTH * 2,
+      Constants.TILE_SIZE * 1 * Constants.SINGLE_MAP_HEIGHT * 1,
     );
 
     // 非衝突のオブジェクトを設定する
@@ -56,7 +56,7 @@ export class Game extends Scene {
     this.controls = new Controls(this);
 
     // プレイヤーの作成
-    this.player = new Player(this, 0, 1);
+    this.player = new Player(this, 1, 1);
 
     // ゴールの作成
     this.goal = new Goal(this, this.map.getTilemap());

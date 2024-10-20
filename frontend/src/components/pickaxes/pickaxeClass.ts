@@ -1,8 +1,14 @@
 import { Scene } from "phaser";
+import { Constants } from "../constants";
 
 export default class PickaxeClass extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Scene, x: number, y: number, texture: string) {
-    super(scene, 64 * x + 32, 64 * y + 32, texture);
+    super(
+      scene,
+      Constants.TILE_SIZE * x + 32,
+      Constants.TILE_SIZE * y + 32,
+      texture
+    );
     scene.add.existing(this);
     scene.physics.add.existing(this);
   }

@@ -4,7 +4,12 @@ export class Constants {
   // "12" は部屋移動のタイルなので衝突しない。
   // "13" は鍵のタイルなので衝突しない
   // "14" はゴールのタイルなので衝突しない
+  // "89" は毒沼のタイルなので衝突しない
   // "99" はピッケルのタイルなので衝突しない
-  static readonly EXCLUDE_COLLIDE_INDEXES = [-1, 0, 12, 13, 14, 99];
+  static readonly EXCLUDE_COLLIDE_INDEXES = [-1, 0, 12, 13, 14, 89, 99];
   static readonly TILE_SIZE = 64;
+
+  // 1画面に表示するマップの横幅と高さ
+  static readonly SINGLE_MAP_WIDTH = 11;
+  static readonly SINGLE_MAP_HEIGHT = 9;
 }

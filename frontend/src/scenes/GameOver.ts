@@ -13,10 +13,10 @@ export class GameOver extends Scene {
     this.camera = this.cameras.main;
     this.camera.setBackgroundColor(0xff0000);
 
-    this.background = this.add.image(384, 384, "background");
+    this.background = this.add.image(352, 228, "background");
     this.background.setAlpha(0.5);
 
-    this.gameover_text = this.add.text(384, 384, "Game Over", {
+    this.gameover_text = this.add.text(352, 228, "Game Over", {
       fontFamily: "Arial Black",
       fontSize: 64,
       color: "#ffffff",
