@@ -70,13 +70,7 @@ export class Game extends Scene {
     )}]`;
 
     // ゴールの作成
-    const goal = this.map
-      .getTilemap()
-      .findTile((tile: Phaser.Tilemaps.Tile) => tile.index === 14);
-    if (!goal) {
-      throw new Error("ゴールが見つかりませんでした。");
-    }
-    this.goal = new Goal(this, goal.x, goal.y);
+    this.goal = new Goal(this, this.map.getTilemap());
 
     // 衝突判定
     this.physics.add.collider(this.groundLayer, this.player);

@@ -1,5 +1,6 @@
 import { Constants } from "../constants";
 import EnemyClass from "./enemyClass";
+
 export default class SlimeSprite extends EnemyClass {
   MOVING_DIRECTION = "right";
 
