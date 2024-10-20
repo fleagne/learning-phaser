@@ -62,11 +62,7 @@ export class Game extends Scene {
     this.goal = new Goal(this, this.map.getTilemap());
 
     // 敵の作成
-    this.enemiesGroup = new EnemiesGroup(
-      this,
-      this.map.getTilemap(),
-      this.groundLayer
-    );
+    this.enemiesGroup = new EnemiesGroup(this, this.map.getTilemap());
 
     // 鍵の作成
     this.keysGroup = new KeysGroup(this, this.map.getTilemap());
@@ -86,12 +82,7 @@ export class Game extends Scene {
     // 衝突判定
     this.physics.add.collider(this.groundLayer, this.player);
     this.physics.add.collider(this.groundLayer, this.enemiesGroup);
-
-    // プレイヤーと敵の衝突判定
-    this.physics.add.overlap(this.player, this.enemiesGroup, () => {
-      this.player.damage(1);
-      this.player.showHP();
-    });
+    this.physics.add.collider(this.player, this.enemiesGroup);
 
     // プレイヤーと鍵の衝突判定
     this.physics.add.overlap(this.player, this.keysGroup, (_, key) => {
@@ -145,7 +136,9 @@ export class Game extends Scene {
       this.controls,
       this.map.getTilemap(),
       this.groundLayer,
-      this.pickaxesGroup
+      this.pickaxesGroup,
+      // プレイヤーの行動を終えてから敵を動かすようにするため
+      this.enemiesGroup
     );
 
     // コントローラーの初期化処理

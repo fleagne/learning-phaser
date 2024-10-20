@@ -40,15 +40,15 @@ export function init() {
     //   ws.send(JSON.stringify({ auth: uuidSmartphone, password: "1234" }));
     // };
 
-    const div = document.getElementById("smartphone-button");
+    // const div = document.getElementById("smartphone-button");
 
-    const button = document.createElement("button");
-    button.setAttribute("id", "button");
-    // button.addEventListener("click", deviceMotionRequest);
-    button.classList.add("button");
-    button.innerText = "スマホで操作する（現在動きません）";
+    // const button = document.createElement("button");
+    // button.setAttribute("id", "button");
+    // // button.addEventListener("click", deviceMotionRequest);
+    // button.classList.add("button");
+    // button.innerText = "スマホで操作する（現在動きません）";
 
-    div?.appendChild(button);
+    // div?.appendChild(button);
   }
 
   // setInterval(() => {

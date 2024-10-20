@@ -1,8 +1,10 @@
 import { Scene } from "phaser";
 import { Constants } from "../constants";
 import Controls from "../controls/controls";
-import SpeechBubble from "../speechBubble/speechBubble";
+import EnemiesGroup from "../enemies/enemiesGroup";
 import PickaxesGroup from "../pickaxes/pickaxesGroup";
+import SpeechBubble from "../speechBubble/speechBubble";
+import SlimeSprite from "../enemies/slime";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   declare body: Phaser.Physics.Arcade.Body;
@@ -88,8 +90,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.hpElement = document.getElementById("hp");
     this.mpElement = document.getElementById("mp");
 
-    this.showHP();
-    this.showMP();
+    this.showHp();
+    this.showMp();
   }
 
   update(
@@ -98,7 +100,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     controls: Controls,
     map: Phaser.Tilemaps.Tilemap,
     groundLayer: Phaser.Tilemaps.TilemapLayer,
-    pickaxesGroup: PickaxesGroup
+    pickaxesGroup: PickaxesGroup,
+    enemiesGroup: EnemiesGroup
   ) {
     // 基本的にマーカーは非表示
     this.marker.setAlpha(0);
@@ -123,6 +126,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.use("pickaxe", map, groundLayer, pickaxesGroup);
         this.canMove = true;
         controls.cancel();
+
+        // プレイヤーのアイテムの使用を終えたのちに、敵の行動を行う
+        enemiesGroup.action(this, groundLayer);
       }
       this.canMove = false;
       this.marker.setAlpha(1);
@@ -178,6 +184,42 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.attack(groundLayer);
         this.canMove = true;
         controls.cancel();
+
+        const originalX = this.x;
+        const originalY = this.y;
+        let moveX = this.x;
+        let moveY = this.y;
+        if (this.anims.currentAnim?.key == "left") moveX -= 32;
+        if (this.anims.currentAnim?.key == "right") moveX += 32;
+        if (this.anims.currentAnim?.key == "up") moveY -= 32;
+        if (this.anims.currentAnim?.key == "down") moveY += 32;
+
+        this.scene.tweens.add({
+          targets: this,
+          x: moveX,
+          y: moveY,
+          duration: 100, // 100ミリ秒で前進
+          onComplete: async () => {
+            // 攻撃先に敵がいた場合は、敵にダメージを与える
+            await enemiesGroup.checkAndHitEnemies(
+              this.marker.x,
+              this.marker.y + 64,
+              1
+            );
+
+            // 攻撃後、元の位置に戻る
+            this.scene.tweens.add({
+              targets: this,
+              x: originalX,
+              y: originalY,
+              duration: 100, // 100ミリ秒で元の位置に戻る
+              onComplete: () => {
+                // プレイヤーの攻撃を終えたのちに、敵の行動を行う
+                enemiesGroup.action(this, groundLayer);
+              },
+            });
+          },
+        });
       }
       this.canMove = false;
       this.marker.setAlpha(1);
@@ -234,9 +276,33 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
           this.y,
           true
         );
-        if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
+        // 左方向に敵がいないかを確認し、敵がいる場合は進行させない
+        let isBlock = false;
+        enemiesGroup.children.iterate(
+          (enemy: Phaser.GameObjects.GameObject) => {
+            if (enemy instanceof SlimeSprite) {
+              if (
+                enemy.x === this.x - Constants.TILE_SIZE &&
+                enemy.y === this.y
+              ) {
+                isBlock = true;
+                // 1体でもいた場合は、ループを終了
+                return false;
+              }
+            }
+            return true;
+          }
+        );
+        if (
+          !isBlock &&
+          Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)
+        ) {
           this.x -= Constants.TILE_SIZE;
           this.canMove = false;
+          // プレイヤーの移動を終えたのちに、敵の行動を行う
+          enemiesGroup.action(this, groundLayer);
+        } else {
+          isBlock = false;
         }
         if (tile?.index === 12) {
           scene.cameras.main.pan(0, 0, 500, "Power2");
@@ -252,9 +318,33 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
           this.y,
           true
         );
-        if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
+        // 右方向に敵がいないかを確認し、敵がいる場合は進行させない
+        let isBlock = false;
+        enemiesGroup.children.iterate(
+          (enemy: Phaser.GameObjects.GameObject) => {
+            if (enemy instanceof SlimeSprite) {
+              if (
+                enemy.x === this.x + Constants.TILE_SIZE &&
+                enemy.y === this.y
+              ) {
+                isBlock = true;
+                // 1体でもいた場合は、ループを終了
+                return false;
+              }
+            }
+            return true;
+          }
+        );
+        if (
+          !isBlock &&
+          Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)
+        ) {
           this.x += Constants.TILE_SIZE;
           this.canMove = false;
+          // プレイヤーの移動を終えたのちに、敵の行動を行う
+          enemiesGroup.action(this, groundLayer);
+        } else {
+          isBlock = false;
         }
         if (tile?.index === 12) {
           scene.cameras.main.pan(768 * 2, 0, 500, "Power2");
@@ -270,9 +360,33 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
           this.y - Constants.TILE_SIZE,
           true
         );
-        if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
+        // 上方向に敵がいないかを確認し、敵がいる場合は進行させない
+        let isBlock = false;
+        enemiesGroup.children.iterate(
+          (enemy: Phaser.GameObjects.GameObject) => {
+            if (enemy instanceof SlimeSprite) {
+              if (
+                enemy.x === this.x &&
+                enemy.y === this.y - Constants.TILE_SIZE
+              ) {
+                isBlock = true;
+                // 1体でもいた場合は、ループを終了
+                return false;
+              }
+            }
+            return true;
+          }
+        );
+        if (
+          !isBlock &&
+          Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)
+        ) {
           this.y -= Constants.TILE_SIZE;
           this.canMove = false;
+          // プレイヤーの移動を終えたのちに、敵の行動を行う
+          enemiesGroup.action(this, groundLayer);
+        } else {
+          isBlock = false;
         }
 
         // 下移動時の処理
@@ -284,9 +398,33 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
           this.y + Constants.TILE_SIZE,
           true
         );
-        if (Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)) {
+        // 下方向に敵がいないかを確認し、敵がいる場合は進行させない
+        let isBlock = false;
+        enemiesGroup.children.iterate(
+          (enemy: Phaser.GameObjects.GameObject) => {
+            if (enemy instanceof SlimeSprite) {
+              if (
+                enemy.x === this.x &&
+                enemy.y === this.y + Constants.TILE_SIZE
+              ) {
+                isBlock = true;
+                // 1体でもいた場合は、ループを終了
+                return false;
+              }
+            }
+            return true;
+          }
+        );
+        if (
+          !isBlock &&
+          Constants.EXCLUDE_COLLIDE_INDEXES.includes(tile?.index as number)
+        ) {
           this.y += Constants.TILE_SIZE;
           this.canMove = false;
+          // プレイヤーの移動を終えたのちに、敵の行動を行う
+          enemiesGroup.action(this, groundLayer);
+        } else {
+          isBlock = false;
         }
       } else {
         // Nothing to do
@@ -337,26 +475,43 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       true
     );
     if (tile?.index === 98) {
-      this.damage(1);
+      this.hit(1);
       new SpeechBubble(
         this.scene,
         this.x,
         this.y,
         "壁を殴るのは痛いよ..."
       ).showBubble();
-      this.showHP();
+      this.showHp();
     }
   }
 
-  showHP() {
+  showHp() {
     this.hpElement!.innerText = `HP: ${this.hp} / ${this.maxHp}`;
   }
 
-  showMP() {
+  showMp() {
     this.mpElement!.innerText = `MP: ${this.mp} / ${this.maxMp}`;
   }
 
-  damage(point: number) {
+  shakeEffect() {
+    this.scene.tweens.add({
+      targets: this, // 対象のスプライト
+      x: this.x + Phaser.Math.Between(-5, 5), // X軸方向にランダムに揺れる
+      y: this.y + Phaser.Math.Between(-5, 5), // Y軸方向にランダムに揺れる
+      duration: 30, // 揺れるアニメーションの時間
+      repeat: 3, // 3回繰り返す
+      yoyo: true, // 揺れた後元に戻る
+      onComplete: () => {
+        // 揺れ終わった後にスプライトを元の位置に戻す
+        this.setPosition(this.x, this.y);
+      },
+    });
+  }
+
+  hit(point: number) {
+    this.shakeEffect();
     this.hp -= point;
+    this.showHp();
   }
 }

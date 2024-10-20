@@ -18,7 +18,7 @@ export default class SpeechBubble {
 
   createBubble(): Phaser.GameObjects.Graphics {
     const bubble = this.scene.add.graphics({ x: this.x, y: this.y });
-    const width = this.text.length * 16 + 20;
+    const width = this.text.length * 16 + 20
     bubble.fillStyle(0xffffff, 1);
     bubble.fillRoundedRect(0, 0, width, 40, 16);
     return bubble;
@@ -44,7 +44,7 @@ export default class SpeechBubble {
   showBubble(): void {
     this.bubble.setVisible(true);
     this.bubbleText.setVisible(true);
-    this.scene.time.delayedCall(2000, this.hideBubble, [], this);
+    this.scene.time.delayedCall(1000, this.hideBubble, [], this);
   }
 
   hideBubble(): void {

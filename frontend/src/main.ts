@@ -1,4 +1,4 @@
-import { init } from "./init";
+// import { init } from "./init";
 import { Boot } from "./scenes/Boot";
 import { Game as MainGame } from "./scenes/Game";
 import { GameClear } from "./scenes/GameClear";
@@ -9,11 +9,11 @@ import { Preloader } from "./scenes/Preloader";
 import { Game, Types } from "phaser";
 
 // 同時にアクセスされたときに干渉しないように調整
-export const uuidWebSocket = self.crypto.randomUUID();
-export const uuidSmartphone = self.crypto.randomUUID();
-export const uuidGame = self.crypto.randomUUID();
+// export const uuidWebSocket = self.crypto.randomUUID();
+// export const uuidSmartphone = self.crypto.randomUUID();
+// export const uuidGame = self.crypto.randomUUID();
 
-init();
+// init();
 
 // ゲームコンフィグについての詳細はこちら：
 // https://newdocs.phaser.io/docs/3.86.0/Phaser.Types.Core.GameConfig
