@@ -1,12 +1,16 @@
 export default class Controls {
-  leftIsDown: boolean;
-  rightIsDown: boolean;
-  upIsDown: boolean;
-  downIsDown: boolean;
-  aIsDown: boolean;
-  bIsDown: boolean;
-  xIsDown: boolean;
-  yIsDown: boolean;
+  leftIsDown: boolean = false;
+  rightIsDown: boolean = false;
+  upIsDown: boolean = false;
+  downIsDown: boolean = false;
+  aIsDown: boolean = false;
+  bIsDown: boolean = false;
+  xIsDown: boolean = false;
+  yIsDown: boolean = false;
+  keyA: Phaser.Input.Keyboard.Key;
+  keyB: Phaser.Input.Keyboard.Key;
+  keyX: Phaser.Input.Keyboard.Key;
+  keyY: Phaser.Input.Keyboard.Key;
 
   private _leftButton: HTMLElement | null;
   private _rightButton: HTMLElement | null;
@@ -17,7 +21,8 @@ export default class Controls {
   private _xButton: HTMLElement | null;
   private _yButton: HTMLElement | null;
 
-  constructor() {
+  constructor(scene: Phaser.Scene) {
+    // コントローラーの操作
     this._leftButton = document.getElementById("left-button");
     this._rightButton = document.getElementById("right-button");
     this._upButton = document.getElementById("up-button");
@@ -51,6 +56,12 @@ export default class Controls {
     this._yButton?.addEventListener("click", () => {
       this.yIsDown = true;
     });
+
+    // キーボード操作
+    this.keyA = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this.keyB = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.B);
+    this.keyX = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.keyY = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Y);
   }
 
   update() {
@@ -58,6 +69,21 @@ export default class Controls {
     this.rightIsDown = false;
     this.upIsDown = false;
     this.downIsDown = false;
+    this.aIsDown = false;
+
+    // キーボード操作
+    if (this.keyA.isDown) {
+      this.aIsDown = true;
+    }
+    if (this.keyB.isDown) {
+      this.bIsDown = true;
+    }
+    if (this.keyX.isDown) {
+      this.xIsDown = true;
+    }
+    if (this.keyY.isDown) {
+      this.yIsDown = true;
+    }
   }
 
   cancel() {

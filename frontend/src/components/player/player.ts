@@ -7,7 +7,13 @@ import PickaxesGroup from "../pickaxes/pickaxesGroup";
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   declare body: Phaser.Physics.Arcade.Body;
   marker: Phaser.GameObjects.Graphics;
+  public hp: number = 20;
+  public mp: number = 10;
+  public maxHp: number = 20;
+  public maxMp: number = 10;
   private canMove: boolean = true;
+  private hpElement: HTMLElement | null;
+  private mpElement: HTMLElement | null;
 
   constructor(scene: Scene, x: number, y: number) {
     super(scene, 64 * x + 32, 64 * y + 32, "tile");
@@ -77,6 +83,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.marker = scene.add.graphics();
     this.marker.lineStyle(4, 0x000000, 1);
     this.marker.strokeRect(64 * x, 64 * y, 64, 64);
+
+    // HPとMPを表示するためのエレメントを取得
+    this.hpElement = document.getElementById("hp");
+    this.mpElement = document.getElementById("mp");
+
+    this.showHP();
+    this.showMP();
   }
 
   update(
@@ -90,6 +103,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 基本的にマーカーは非表示
     this.marker.setAlpha(0);
 
+    // アイテムの使用
     if (controls.xIsDown) {
       if (pickaxesGroup.pickaxes === 0) {
         new SpeechBubble(
@@ -154,6 +168,62 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
+    // 攻撃
+    if (controls.yIsDown) {
+      if (controls.bIsDown) {
+        this.canMove = true;
+        controls.cancel();
+      }
+      if (controls.aIsDown) {
+        this.attack(groundLayer);
+        this.canMove = true;
+        controls.cancel();
+      }
+      this.canMove = false;
+      this.marker.setAlpha(1);
+
+      if (this.anims.currentAnim?.key == "left") {
+        // プレイヤーの前方にマーカーを表示させる（左）
+        this.marker.x = this.x - 64 * 2 + 32;
+        this.marker.y = this.y - 64 * 1 - 32;
+      }
+
+      if (this.anims.currentAnim?.key == "right") {
+        // プレイヤーの前方にマーカーを表示させる（右）
+        this.marker.x = this.x + 64 * 0 + 32;
+        this.marker.y = this.y - 64 * 1 - 32;
+      }
+
+      if (this.anims.currentAnim?.key == "up") {
+        // プレイヤーの前方にマーカーを表示させる（上）
+        this.marker.x = this.x - 64 * 1 + 32;
+        this.marker.y = this.y - 64 * 2 - 32;
+      }
+
+      if (this.anims.currentAnim?.key == "down") {
+        // プレイヤーの前方にマーカーを表示させる（下）
+        this.marker.x = this.x - 64 * 1 + 32;
+        this.marker.y = this.y + 64 * 0 - 32;
+      }
+
+      if (cursors.left.isDown || controls.leftIsDown) {
+        this.anims.play("left", true);
+      }
+
+      if (cursors.right.isDown || controls.rightIsDown) {
+        this.anims.play("right", true);
+      }
+
+      if (cursors.up.isDown || controls.upIsDown) {
+        this.anims.play("up", true);
+      }
+
+      if (cursors.down.isDown || controls.downIsDown) {
+        this.anims.play("down", true);
+      }
+    }
+
+    // 移動
     if (this.canMove) {
       // 左移動時の処理
       if (cursors.left.isDown || controls.leftIsDown) {
@@ -258,5 +328,35 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         ).showBubble();
       }
     }
+  }
+
+  attack(groundLayer: Phaser.Tilemaps.TilemapLayer) {
+    const tile = groundLayer.getTileAtWorldXY(
+      this.marker.x,
+      this.marker.y + 64, // 補正する
+      true
+    );
+    if (tile?.index === 98) {
+      this.damage(1);
+      new SpeechBubble(
+        this.scene,
+        this.x,
+        this.y,
+        "壁を殴るのは痛いよ..."
+      ).showBubble();
+      this.showHP();
+    }
+  }
+
+  showHP() {
+    this.hpElement!.innerText = `HP: ${this.hp} / ${this.maxHp}`;
+  }
+
+  showMP() {
+    this.mpElement!.innerText = `MP: ${this.mp} / ${this.maxMp}`;
+  }
+
+  damage(point: number) {
+    this.hp -= point;
   }
 }

@@ -214,8 +214,16 @@
       <div id="game-container"></div>
     </div>
     <br />
-    <div id="left-keys" style="text-align: right"></div>
-    <div id="pickaxes" style="text-align: right"></div>
+    <div style="display: flex; justify-content: space-between">
+      <div>
+        <div id="hp"></div>
+        <div id="mp"></div>
+      </div>
+      <div>
+        <div id="left-keys" style="text-align: right"></div>
+        <div id="pickaxes" style="text-align: right"></div>
+      </div>
+    </div>
     <div class="spf-controller">
       <div class="controller-left">
         <div class="cross-layout">
@@ -246,13 +254,29 @@
       <div class="controller-right">
         <div class="abxy-btn-set">
           <div class="cross-layout">
-            <button id="x-button" class="btn abxy-btn position-top btn-x">X</button>
-            <button id="y-button" class="btn abxy-btn position-left btn-y">Y</button>
-            <button id="a-button" class="btn abxy-btn position-right btn-a">A</button>
-            <button id="b-button" class="btn abxy-btn position-bottom btn-b">B</button>
+            <button id="x-button" class="btn abxy-btn position-top btn-x">
+              X
+            </button>
+            <button id="y-button" class="btn abxy-btn position-left btn-y">
+              Y
+            </button>
+            <button id="a-button" class="btn abxy-btn position-right btn-a">
+              A
+            </button>
+            <button id="b-button" class="btn abxy-btn position-bottom btn-b">
+              B
+            </button>
           </div>
         </div>
       </div>
+    </div>
+    <br />
+    <div>
+      <h2>遊び方</h2>
+      <p>コントローラーを使用して遊べます</p>
+      <p>Xボタンを押したのち、方向を選んでAボタンで、アイテムを使えます</p>
+      <p>Yボタンを押したのち、方向を選んでAボタンで、攻撃ができます</p>
+      <p>Bボタンで行動のキャンセルができます</p>
     </div>
     <br />
     <div id="buy-me-a-coffee" style="text-align: center">

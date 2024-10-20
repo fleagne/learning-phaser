@@ -9,7 +9,7 @@ import Map from "../components/map";
 import PickaxeSprite from "../components/pickaxes/pickaxes";
 import PickaxesGroup from "../components/pickaxes/pickaxesGroup";
 import Player from "../components/player/player";
-import { uuidGame, uuidWebSocket } from "../main";
+// import { uuidGame, uuidWebSocket } from "../main";
 
 export class Game extends Scene {
   map: Map;
@@ -24,7 +24,7 @@ export class Game extends Scene {
   pickaxesGroup: PickaxesGroup;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   controls?: Controls;
-  acceleration?: { x: number; y: number; z: number };
+  // acceleration?: { x: number; y: number; z: number };
 
   constructor() {
     super("Game");
@@ -53,7 +53,7 @@ export class Game extends Scene {
     this.cursors = this.input.keyboard?.createCursorKeys();
 
     // コントローラーによる入力を受け付けられるようにする
-    this.controls = new Controls();
+    this.controls = new Controls(this);
 
     // プレイヤーの作成
     this.player = new Player(this, 0, 1);
@@ -89,7 +89,8 @@ export class Game extends Scene {
 
     // プレイヤーと敵の衝突判定
     this.physics.add.overlap(this.player, this.enemiesGroup, () => {
-      this.scene.start("GameOver");
+      this.player.damage(1);
+      this.player.showHP();
     });
 
     // プレイヤーと鍵の衝突判定
@@ -121,17 +122,17 @@ export class Game extends Scene {
     });
 
     // スマートフォンでアクセスしている場合は、WebSocketサーバにアクセスし、加速度情報を取得する
-    if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
-      const ws = new WebSocket(`wss://cloud.achex.ca/${uuidWebSocket}`);
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ auth: uuidGame, password: "1234" }));
-      };
+    // if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
+    //   const ws = new WebSocket(`wss://cloud.achex.ca/${uuidWebSocket}`);
+    //   ws.onopen = () => {
+    //     ws.send(JSON.stringify({ auth: uuidGame, password: "1234" }));
+    //   };
 
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        this.updateAcceleration(data.message.acceleration);
-      };
-    }
+    //   ws.onmessage = (event) => {
+    //     const data = JSON.parse(event.data);
+    //     this.updateAcceleration(data.message.acceleration);
+    //   };
+    // }
   }
 
   update() {
@@ -144,24 +145,29 @@ export class Game extends Scene {
       this.controls,
       this.map.getTilemap(),
       this.groundLayer,
-      this.pickaxesGroup,
+      this.pickaxesGroup
     );
 
     // コントローラーの初期化処理
     this.controls.update();
-  }
 
-  updateAcceleration(acceleration: { x: number; y: number; z: number }) {
-    // 受信した加速度情報を表示
-    this.acceleration = {
-      x: Math.floor(acceleration.x),
-      y: Math.floor(acceleration.y),
-      z: Math.floor(acceleration.z),
-    };
-
-    const accelerationElem = document.getElementById("acceleration");
-    if (accelerationElem) {
-      accelerationElem.innerText = `Acceleration:\nX: ${this.acceleration.x}\nY: ${this.acceleration.y}\nZ: ${this.acceleration.z}`;
+    // プレイヤーの体力が0になったら、ゲームオーバー
+    if (this.player.hp === 0) {
+      this.scene.start("GameOver");
     }
   }
+
+  // updateAcceleration(acceleration: { x: number; y: number; z: number }) {
+  //   // 受信した加速度情報を表示
+  //   this.acceleration = {
+  //     x: Math.floor(acceleration.x),
+  //     y: Math.floor(acceleration.y),
+  //     z: Math.floor(acceleration.z),
+  //   };
+
+  //   const accelerationElem = document.getElementById("acceleration");
+  //   if (accelerationElem) {
+  //     accelerationElem.innerText = `Acceleration:\nX: ${this.acceleration.x}\nY: ${this.acceleration.y}\nZ: ${this.acceleration.z}`;
+  //   }
+  // }
 }

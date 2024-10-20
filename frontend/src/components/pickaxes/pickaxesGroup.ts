@@ -26,7 +26,7 @@ export default class PickaxesGroup extends Phaser.GameObjects.Group {
 
   showPickaxes() {
     // 獲得したピッケルの表示をするためのエレメントを取得
-    this.pickaxesElement!.innerText = `ピッケル(Xで方向を選択し、Aで使用): [ ${"⛏️ ".repeat(
+    this.pickaxesElement!.innerText = `ピッケル: [ ${"⛏️ ".repeat(
       this.pickaxes
     )}]`;
   }
