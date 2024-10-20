@@ -43,7 +43,7 @@ export class Game extends Scene {
 
     this.groundLayer.setDisplaySize(
       Constants.TILE_SIZE * 1 * Constants.SINGLE_MAP_WIDTH * 2,
-      Constants.TILE_SIZE * 1 * Constants.SINGLE_MAP_HEIGHT * 1,
+      Constants.TILE_SIZE * 1 * Constants.SINGLE_MAP_HEIGHT * 1
     );
 
     // 非衝突のオブジェクトを設定する
@@ -110,6 +110,12 @@ export class Game extends Scene {
     // プレイヤーとゴールの衝突判定
     this.physics.add.overlap(this.player, this.goal, () => {
       this.scene.start("GameClear");
+    });
+
+    // チュートリアルの説明文追加
+    this.add.text(128, 80, "操作説明\nXボタンで対象を選択後、Aボタンでアイテムを使用できます\nYボタンで対象を選択後、Aボタンで攻撃ができます\nBボタンで行動をキャンセルできます", {
+      padding: { top: 5 },
+      lineSpacing: 10
     });
 
     // スマートフォンでアクセスしている場合は、WebSocketサーバにアクセスし、加速度情報を取得する
