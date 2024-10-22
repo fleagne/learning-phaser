@@ -4,6 +4,7 @@ export interface AppParameter {
   envName: string;
   env?: Environment;
 }
+
 export const devParameter: AppParameter = {
   envName: "Dev",
   env: { account: process.env.AWS_ACCOUNT_ID, region: "ap-northeast-1" },

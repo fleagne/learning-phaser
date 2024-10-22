@@ -11,10 +11,13 @@ const argContext = "environment";
 // cdk synth -c environment=dev
 const envKey = app.node.tryGetContext(argContext);
 const parameters = [devParameter, prdParameter];
+
+// envNameは大文字から始まっているので、小文字対応できるように
 const appParameter: AppParameter = parameters.filter(
   (obj: AppParameter) => obj.envName.toLocaleLowerCase() === envKey
 )[0];
 
+// DevLearningPhaserStack, PrdLearningPhaserStackという名称になる
 new LearningPhaserStack(app, `${appParameter.envName}LearningPhaserStack`, {
   ...appParameter,
 });
