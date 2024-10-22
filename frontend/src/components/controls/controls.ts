@@ -11,6 +11,7 @@ export default class Controls {
   keyB: Phaser.Input.Keyboard.Key;
   keyX: Phaser.Input.Keyboard.Key;
   keyY: Phaser.Input.Keyboard.Key;
+  keyEnter: Phaser.Input.Keyboard.Key;
 
   private _leftButton: HTMLElement | null;
   private _rightButton: HTMLElement | null;
@@ -62,6 +63,7 @@ export default class Controls {
     this.keyB = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.B);
     this.keyX = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.X);
     this.keyY = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Y);
+    this.keyEnter = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
   }
 
   update() {
@@ -72,7 +74,7 @@ export default class Controls {
     this.aIsDown = false;
 
     // キーボード操作
-    if (this.keyA.isDown) {
+    if (this.keyA.isDown || this.keyEnter.isDown) {
       this.aIsDown = true;
     }
     if (this.keyB.isDown) {
