@@ -42,8 +42,16 @@ export class Game extends Scene {
     }
 
     this.groundLayer.setDisplaySize(
-      Constants.TILE_SIZE * 1 * Constants.SINGLE_MAP_WIDTH * 2,
-      Constants.TILE_SIZE * 1 * Constants.SINGLE_MAP_HEIGHT * 1
+      (Constants.TILE_SIZE *
+        1 *
+        Constants.SINGLE_MAP_WIDTH *
+        this.map.getTilemap().width) /
+        11,
+      (Constants.TILE_SIZE *
+        1 *
+        Constants.SINGLE_MAP_HEIGHT *
+        this.map.getTilemap().height) /
+        9
     );
 
     // 非衝突のオブジェクトを設定する
@@ -55,8 +63,14 @@ export class Game extends Scene {
     // コントローラーによる入力を受け付けられるようにする
     this.controls = new Controls(this);
 
+    const playerPlace = this.map.getTilemap().findByIndex(1);
+    if (!playerPlace) {
+      throw new Error("プレイヤーの初期位置が見つかりませんでした。");
+    }
+    this.map.getTilemap().replaceByIndex(1, 0);
+
     // プレイヤーの作成
-    this.player = new Player(this, 1, 1);
+    this.player = new Player(this, playerPlace.x, playerPlace.y);
 
     // ゴールの作成
     this.goal = new Goal(this, this.map.getTilemap());
@@ -113,10 +127,15 @@ export class Game extends Scene {
     });
 
     // チュートリアルの説明文追加
-    this.add.text(128, 80, "操作説明\nXボタンで対象を選択後、Aボタンでアイテムを使用できます\nYボタンで対象を選択後、Aボタンで攻撃ができます\nBボタンで行動をキャンセルできます", {
-      padding: { top: 5 },
-      lineSpacing: 10
-    });
+    this.add.text(
+      128,
+      80,
+      "操作説明\nXボタンで対象を選択後、Aボタンでアイテムを使用できます\nYボタンで対象を選択後、Aボタンで攻撃ができます\nBボタンで行動をキャンセルできます",
+      {
+        padding: { top: 5 },
+        lineSpacing: 10,
+      }
+    );
 
     // スマートフォンでアクセスしている場合は、WebSocketサーバにアクセスし、加速度情報を取得する
     // if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
