@@ -67,6 +67,7 @@ export class Game extends Scene {
     if (!playerPlace) {
       throw new Error("プレイヤーの初期位置が見つかりませんでした。");
     }
+    // プレイヤーを表す1のタイルを0にする
     this.map.getTilemap().replaceByIndex(1, 0);
 
     // プレイヤーの作成
