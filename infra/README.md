@@ -12,3 +12,8 @@
 ├ utils // 共通で使用できるものを定義
 └ ...
 ```
+
+## デプロイ方法
+```
+cdk synth -c environment=dev
+```
