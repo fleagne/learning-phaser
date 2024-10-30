@@ -120,6 +120,9 @@ cdk destroy -c environment=dev
 
 
 ## 🎯 Functions
+- Roguelike
+- Tower Defense
+- TCG
 - Play HTML5 Game
 - Move player with your Smartphone
 
