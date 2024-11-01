@@ -125,12 +125,14 @@ cdk destroy -c environment=dev
 - TCG
 - Play HTML5 Game
 - Move player with your Smartphone
+- Ranking
 
 
 ## 💡 Thoughts
 - Learning game programming
 - Learning Phaser 3
 - Learning AWS
+- Learning AWS CDK
 
 
 ## ⚠️ Restriction
